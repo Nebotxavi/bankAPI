@@ -1,3 +1,35 @@
-pip install -r requirements. txt
+With Python 3.8
 
-uvicorn main:app --reload
+--- SETUP ---
+
+pip3 -m venv venv
+source venv/bin/activate
+
+pip3 install -r requirements. txt
+
+.env structure:
+
+postgresql_hostname=''
+postgresql_port=''
+postgresql_password=''
+postgresql_name=''
+postgresql_username=''
+
+mongo_password=''
+mongo_username=''
+
+db_name=''
+db_type=''
+
+--- COMMANDS ---
+
+uvicorn app.main:app --reload
+NOTE: main as per the main file name. App as per the variable name inside the main file.
+
+--- OTHERS ---
+
+http://localhost:8000/openapi.json
+http://localhost:8000/docs
+
+if problems:
+sudo apt install python3-dev libpq-dev

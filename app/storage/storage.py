@@ -7,7 +7,7 @@ from .mongo_storage import MongoStorage
 from .postgres_storage import PostgresStorage
 
 
-from ..models.test import DatabaseTest
+from ..models.DB_models.test import DatabaseTest
 
 class DatabaseType(Enum):
     MONGO = auto()
@@ -22,7 +22,7 @@ class Storage(Protocol):
 
 class StorageAccess:
     @staticmethod
-    def get_db(request: Request): # TODO: type the output
+    def get_db(request: Request) -> Storage:
         return request.app.state.db
 
 class StorageFactory:
@@ -32,7 +32,6 @@ class StorageFactory:
             return MongoStorage(dbConfig=dbConfig)
         if type == DatabaseType.POSTGRESQL:
             return PostgresStorage(dbConfig=dbConfig)
-        else:
-            raise Exception('Wrong database configuration')
-
+        
+        return MongoStorage(dbConfig=dbConfig)
     

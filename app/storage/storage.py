@@ -1,23 +1,41 @@
 from enum import Enum, auto
-from typing import Protocol, List
+from typing import Protocol, List, Union
 from starlette.requests import Request
 
 from ..config import DbConfig
 from .mongo_storage import MongoStorage
 from .postgres_storage import PostgresStorage
+from .state_storage import StateStorage
 
-
-from ..models.DB_models.test import DatabaseTest
+from ..models.general import Test
+from ..models.products import Product
+from ..models.customers import Customer, CustomerIn
 
 class DatabaseType(Enum):
     MONGO = auto()
     POSTGRESQL = auto()
+    STATE = auto()
 
 class Storage(Protocol):
     def __init__(self, dbConfig: DbConfig) -> None:
         ...
     
-    def test_database(self) -> List[DatabaseTest]:
+    def test_database(self) -> List[Test]:
+        ...
+
+    def get_products_list(self) -> List[Product]:
+        ...
+
+    def get_product(self, id) -> Product:
+        ...
+
+    def get_customers_list(self) -> List[Customer]:
+        ...
+
+    def get_customer(self, id) -> Customer:
+        ...
+
+    def create_customer(self, customer: CustomerIn) -> Customer:
         ...
 
 class StorageAccess:
@@ -33,5 +51,5 @@ class StorageFactory:
         if type == DatabaseType.POSTGRESQL:
             return PostgresStorage(dbConfig=dbConfig)
         
-        return MongoStorage(dbConfig=dbConfig)
+        return StateStorage(dbConfig=dbConfig)
     

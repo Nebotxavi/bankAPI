@@ -1,10 +1,9 @@
-from fastapi import FastAPI, Depends
-from typing import List
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .config import dbConfig
-from .storage.storage import DatabaseType, StorageFactory, StorageAccess
-from .models.API_models.test import Test
+from .storage.storage import DatabaseType, StorageFactory
+from .routers import test, products, customers
 
 app = FastAPI()
 
@@ -18,6 +17,10 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
+app.include_router(test.router)
+app.include_router(products.router)
+app.include_router(customers.router)
+
 @app.on_event('startup')
 def db_start():
     # TODO: error handling
@@ -27,10 +30,3 @@ def db_start():
 async def root():
     return {"status": "OK"}
 
-@app.get('/test', response_model=List[Test])
-def test(client = Depends(StorageAccess.get_db)):
-    # Error handling
-    tests = client.test_database()
-    list(map(lambda test: test.update({"message": f"Message for name: {test['name']}"}) , tests))
-
-    return tests

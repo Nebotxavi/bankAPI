@@ -1,10 +1,11 @@
 import psycopg2
 from psycopg2.extras import RealDictCursor
 from psycopg2.extensions import cursor
-
-from ..models.DB_models.test import DatabaseTest
-from ..config import DbConfig
 from typing import List, Any
+
+from ..config import DbConfig
+from ..models.products import Product
+from ..models.customers import Customer, CustomerIn
 
 # TODO: switch to SQL alchemy (engine, session_local, base...)
 
@@ -37,3 +38,18 @@ class PostgresStorage:
     def test_database(self) -> List[Any]: # TODO: fix types (avoid any)
         self.client.execute(''' SELECT * FROM health ''')
         return self.client.fetchall()
+
+    def get_products_list(self) -> List[Product]:
+        ...
+
+    def get_product(self, id) -> Product:
+        ...
+
+    def get_customers_list(self) -> List[Customer]:
+        ...
+
+    def get_customer(self, id: int) -> Customer:
+        ...
+
+    def create_customer(self, customer: CustomerIn) -> Customer:
+        ...

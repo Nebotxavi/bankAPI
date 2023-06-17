@@ -47,6 +47,7 @@ class StateStorage:
 
         return max(latest_id) + 1 if latest_id else 0
 
+    # TODO: to be removed
     def test_database(self) -> List[Test]:
         return self.test_list
 

@@ -11,15 +11,17 @@ from ..models.general import Test
 from ..models.products import Product
 from ..models.customers import Customer, CustomerIn
 
+
 class DatabaseType(Enum):
     MONGO = auto()
     POSTGRESQL = auto()
     STATE = auto()
 
+
 class Storage(Protocol):
     def __init__(self, dbConfig: DbConfig) -> None:
         ...
-    
+
     def test_database(self) -> List[Test]:
         ...
 
@@ -38,10 +40,12 @@ class Storage(Protocol):
     def create_customer(self, customer: CustomerIn) -> Customer:
         ...
 
+
 class StorageAccess:
     @staticmethod
     def get_db(request: Request) -> Storage:
         return request.app.state.db
+
 
 class StorageFactory:
     @staticmethod
@@ -50,6 +54,5 @@ class StorageFactory:
             return MongoStorage(dbConfig=dbConfig)
         if type == DatabaseType.POSTGRESQL:
             return PostgresStorage(dbConfig=dbConfig)
-        
+
         return StateStorage(dbConfig=dbConfig)
-    

@@ -9,15 +9,23 @@ from app.main import app
 
 app.state.db = StorageFactory.get_storage(DatabaseType.STATE, dbConfig)
 
+
 @pytest.fixture
 def client():
     client = TestClient(app)
 
     return client
 
-# TODO: READ!!!! CANNOT ACCESS TO THE CLIENT, SUPOSEDLY IN LINE 10 IT SET THE DB
+
 @pytest.fixture
-def test_customers(client_state = Depends(StorageAccess.get_db)):
+def products():
+    client_state = app.state.db
+    return client_state.products_list
+
+
+@pytest.fixture
+def test_customers():
+    client_state = app.state.db
     test_customers_list = [
         {
             "personal_id": '62819372V',
@@ -43,7 +51,7 @@ def test_customers(client_state = Depends(StorageAccess.get_db)):
         }
     ]
 
-    customers = []
+    customers = client_state.customers_list
 
     for test_customer in test_customers_list:
         customer = CustomerIn(**test_customer)

@@ -2,9 +2,11 @@ from pydantic import BaseModel
 from typing import Optional
 from enum import Enum
 
+
 class CustomerType(Enum):
     STANDARD = "Standard"
     ANALYST = "Analyst"
+
 
 class CustomerBase(BaseModel):
     personal_id: str
@@ -14,9 +16,10 @@ class CustomerBase(BaseModel):
     additional_surname: Optional[str] = None
     customer_type: CustomerType
 
+
 class Customer(CustomerBase):
-    id: int
+    id: str
+
 
 class CustomerIn(CustomerBase):
     pass
-

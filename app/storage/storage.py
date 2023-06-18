@@ -4,7 +4,7 @@ from starlette.requests import Request
 
 from ..config import DbConfig
 from .mongo_storage import MongoStorage
-from .postgres_storage import PostgresStorage
+# from .postgres_storage import PostgresStorage
 from .state_storage import StateStorage
 
 from ..models.general import Test
@@ -52,7 +52,7 @@ class StorageFactory:
     def get_storage(type: DatabaseType, dbConfig: DbConfig) -> Storage:
         if type == DatabaseType.MONGO:
             return MongoStorage(dbConfig=dbConfig)
-        if type == DatabaseType.POSTGRESQL:
-            return PostgresStorage(dbConfig=dbConfig)
+        # if type == DatabaseType.POSTGRESQL:
+        #     return PostgresStorage(dbConfig=dbConfig)
 
         return StateStorage(dbConfig=dbConfig)

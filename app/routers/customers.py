@@ -50,6 +50,16 @@ def create_customer(customer: CustomerIn, client=Depends(StorageAccess.get_db)):
 # TODO: auth issue: diference between banker (can edit all) and user (can edit only part of himself)
 
 
-@router.put("/", response_model=Customer)
-def update_post(id: str, customer: Customer):
-    pass
+@router.put("/{id}", response_model=Customer)
+def update_post(id: str, customer: CustomerIn, client=Depends(StorageAccess.get_db)):
+    try:
+        updated_customer = client.update_customer(id, customer)
+
+        return updated_customer
+
+    except resourceNotFound:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f"User with id: {id} was not found")
+    except noUniqueElement:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT,
+                            detail=f"Could not create the new customer. The personal ID {customer.personal_id} is already used.")

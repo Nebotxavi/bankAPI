@@ -55,9 +55,9 @@ class StateStorage:
         else:
             return self._get_new_id(self, items, key)
 
-    def _validate_personal_id(self, id):
+    def _validate_personal_id(self, id: str, exception: List[str] = []):
         all_ids = list(
-            map(lambda customer: customer.personal_id, self.customers_list))
+            map(lambda customer: customer.personal_id if customer.personal_id not in exception else '', self.customers_list))
 
         if id in all_ids:
             return False
@@ -104,3 +104,29 @@ class StateStorage:
         self.customers_list.append(new_customer)
 
         return new_customer
+
+    def update_customer(self, id: str, customer: CustomerIn) -> Customer:
+        customer_index = next((ind for ind, customer in enumerate(
+            self.customers_list) if customer.id == id), None)
+
+        if customer_index == None:
+            raise resourceNotFound
+
+        updated_customer = {
+            **self.customers_list[customer_index].dict(),
+            **customer.dict()
+        }
+
+        if customer.personal_id:
+
+            is_personal_id_valid = self._validate_personal_id(
+                customer.personal_id, [updated_customer['personal_id']])
+
+            if not is_personal_id_valid:
+                raise noUniqueElement
+
+        validated_customer = Customer(**updated_customer)
+
+        self.customers_list[customer_index] = validated_customer
+
+        return self.customers_list[customer_index]

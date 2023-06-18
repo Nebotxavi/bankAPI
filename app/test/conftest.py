@@ -1,31 +1,21 @@
-from fastapi import Depends
 from fastapi.testclient import TestClient
+from typing import List
 import pytest
 
+
 from app.storage.storage import StorageFactory, DatabaseType, StorageAccess
-from app.models.customers import CustomerType, CustomerIn
+from app.models.customers import CustomerType, CustomerIn, Customer
 from app.config import dbConfig
 from app.main import app
 
 app.state.db = StorageFactory.get_storage(DatabaseType.STATE, dbConfig)
 
 
-@pytest.fixture
-def client():
-    client = TestClient(app)
-
-    return client
-
-
-@pytest.fixture
-def products():
+@app.on_event("startup")
+def create_test_customers():
     client_state = app.state.db
-    return client_state.products_list
+    customers = []
 
-
-@pytest.fixture
-def test_customers():
-    client_state = app.state.db
     test_customers_list = [
         {
             "personal_id": '62819372V',
@@ -51,12 +41,32 @@ def test_customers():
         }
     ]
 
-    customers = client_state.customers_list
-
     for test_customer in test_customers_list:
         customer = CustomerIn(**test_customer)
 
         new_customer = client_state.create_customer(customer)
         customers.append(new_customer)
+
+    return customers
+
+
+@pytest.fixture
+def client():
+    client = TestClient(app)
+
+    return client
+
+
+@pytest.fixture
+def products():
+    client_state = app.state.db
+
+    return client_state.products_list
+
+
+@pytest.fixture
+def test_customers() -> List[Customer]:
+    client_state = app.state.db
+    customers = client_state.get_customers_list()
 
     return customers

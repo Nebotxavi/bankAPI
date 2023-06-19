@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status, HTTPException
+from fastapi import APIRouter, Depends, status, HTTPException, Response
 from typing import List, Optional
 
 from ..models.customers import Customer, CustomerIn, CustomerType
@@ -26,7 +26,7 @@ def get_customers_list(client=Depends(StorageAccess.get_db),
 @router.get("/{id}", response_model=Customer)
 def get_customer(id: str, client=Depends(StorageAccess.get_db)):
     try:
-        customer = client.get_customer(id)
+        customer = client.get_customer_by_id(id)
         return customer
 
     except resourceNotFound:
@@ -51,7 +51,7 @@ def create_customer(customer: CustomerIn, client=Depends(StorageAccess.get_db)):
 
 
 @router.put("/{id}", response_model=Customer)
-def update_post(id: str, customer: CustomerIn, client=Depends(StorageAccess.get_db)):
+def update_customer(id: str, customer: CustomerIn, client=Depends(StorageAccess.get_db)):
     try:
         updated_customer = client.update_customer(id, customer)
 
@@ -63,3 +63,16 @@ def update_post(id: str, customer: CustomerIn, client=Depends(StorageAccess.get_
     except noUniqueElement:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT,
                             detail=f"Could not create the new customer. The personal ID {customer.personal_id} is already used.")
+
+
+@router.delete("/{id}", response_model=Customer)
+def delete_customer(id: str, client=Depends(StorageAccess.get_db)):
+    try:
+        client.delete_customer(id)
+    
+        return Response(status_code=status.HTTP_204_NO_CONTENT,
+                        content=f'User with id: {id} has been removed.')
+
+    except resourceNotFound:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f"User with id: {id} was not found.")

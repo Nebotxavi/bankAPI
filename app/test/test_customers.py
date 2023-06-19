@@ -1,8 +1,9 @@
 from fastapi import status
+from typing import List
 from app.models.customers import Customer, CustomerType, CustomerIn
 
 
-def test_get_customers(client, test_customers):
+def test_get_customers(client, test_customers: List[Customer]):
 
     res = client.get(f'/customers/')
 
@@ -16,7 +17,7 @@ def test_get_customers(client, test_customers):
     assert res.status_code == 200
 
 
-def test_get_customer(client, test_customers):
+def test_get_customer(client, test_customers: List[Customer]):
     res = client.get(f'/customers/{test_customers[0].id}')
 
     customer = Customer(**res.json())
@@ -70,7 +71,7 @@ def test_create_wrong_customer(client):
     assert res.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
-def test_create_customer_with_personal_id_already_used(client, test_customers):
+def test_create_customer_with_personal_id_already_used(client, test_customers: List[Customer]):
     new_customer = {
         "personal_id": test_customers[0].personal_id,
         "family_name": "Antionet",
@@ -84,7 +85,7 @@ def test_create_customer_with_personal_id_already_used(client, test_customers):
     assert res.status_code == status.HTTP_409_CONFLICT
 
 
-def test_update_customer(client, test_customers):
+def test_update_customer(client, test_customers: List[Customer]):
     current_customer = test_customers[0]
 
     updated_customer = {
@@ -104,7 +105,69 @@ def test_update_customer(client, test_customers):
     assert received_customer.family_name == updated_customer['family_name']
 
 
+def test_update_with_wrong_data(client, test_customers: List[Customer]):
+    current_customer = test_customers[0]
+
+    updated_customer = {
+        "personal_id": current_customer.personal_id,
+        "middle_name": current_customer.middle_name,
+        "additional_surname": current_customer.additional_surname,
+        "customer_type": current_customer.customer_type.value
+    }
+
+    res = client.put(
+        f'/customers/{test_customers[0].id}', json=updated_customer)
+
+    assert res.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+
+
+def test_update_with_used_personal_id(client, test_customers: List[Customer]):
+    current_customer = test_customers[0]
+    other_customer = test_customers[1]
+
+    updated_customer = {
+        "personal_id": other_customer.personal_id,
+        "family_name": current_customer.family_name,
+        "middle_name": current_customer.middle_name,
+        "surname": current_customer.surname,
+        "additional_surname": current_customer.additional_surname,
+        "customer_type": current_customer.customer_type.value
+    }
+
+    res = client.put(
+        f'/customers/{test_customers[0].id}', json=updated_customer)
+
+    assert res.status_code == status.HTTP_409_CONFLICT
+
+
+def test_update_with_blank_optional_data(client, test_customers: List[Customer]):
+    current_customer = test_customers[0]
+
+    updated_customer = {
+        "personal_id": current_customer.personal_id,
+        "family_name": 'Walden',
+        "surname": current_customer.surname,
+        "customer_type": current_customer.customer_type.value
+    }
+
+    res = client.put(
+        f'/customers/{test_customers[0].id}', json=updated_customer)
+    received_customer = Customer(**res.json())
+
+    assert res.status_code == status.HTTP_200_OK
+    assert received_customer.middle_name == None
+    assert received_customer.additional_surname == None
+
+
+def test_delete_customer(client, test_customers: List[Customer]):
+    res = client.delete(f'/customers/{test_customers[0].id}')
+
+    assert res.status_code == status.HTTP_204_NO_CONTENT
+
+def test_delete_wrong_customer(client, test_customers: List[Customer]):
+    res = client.delete('customers/888888888')
+
+    assert res.status_code == status.HTTP_404_NOT_FOUND
+
+
 # TOTEST: wrong customer_type
-# TOTEST: update with empty optional fields
-# TOTEST: update with wrong schema
-# TOTEST: udpate with other's dni

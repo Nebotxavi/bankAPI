@@ -53,7 +53,7 @@ class StateStorage:
             return new_id
 
         else:
-            return self._get_new_id(self, items, key)
+            return self._get_new_id(items, key)
 
     def _validate_personal_id(self, id: str, exception: List[str] = []):
         all_ids = list(
@@ -84,7 +84,7 @@ class StateStorage:
     def get_customers_list(self) -> List[Customer]:
         return self.customers_list
 
-    def get_customer(self, id: int) -> Customer:
+    def get_customer_by_id(self, id: int) -> Customer:
         customer = next((x for x in self.customers_list if x.id == id), None)
 
         if not customer:
@@ -112,21 +112,32 @@ class StateStorage:
         if customer_index == None:
             raise resourceNotFound
 
-        updated_customer = {
-            **self.customers_list[customer_index].dict(),
-            **customer.dict()
-        }
+        current_customer = self.customers_list[customer_index]
 
         if customer.personal_id:
-
             is_personal_id_valid = self._validate_personal_id(
-                customer.personal_id, [updated_customer['personal_id']])
+                customer.personal_id, [current_customer.personal_id])
 
             if not is_personal_id_valid:
                 raise noUniqueElement
+
+        updated_customer = {
+            **current_customer.dict(),
+            **customer.dict()
+        }
 
         validated_customer = Customer(**updated_customer)
 
         self.customers_list[customer_index] = validated_customer
 
         return self.customers_list[customer_index]
+
+    def delete_customer(self, id:str) -> None:
+        customer_index = next((ind for ind, customer in enumerate(
+            self.customers_list) if customer.id == id), None)
+
+        if customer_index == None:
+            raise resourceNotFound
+
+        del self.customers_list[customer_index]
+

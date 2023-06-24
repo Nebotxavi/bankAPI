@@ -23,10 +23,10 @@ def test_get_customers(client, test_customers: List[Customer]):
     assert res.status_code == 200
 
 def test_get_customers_with_pagination_params(client, test_customers: List[Customer]):
-    amount = 5
+    per_page = 5
     page = 2
 
-    res = client.get(f'/customers/?amount={amount}&page={page}')
+    res = client.get(f'/customers/?per_page={per_page}&page={page}')
 
     def validate(customer):
         return Customer(**customer.dict())
@@ -40,10 +40,10 @@ def test_get_customers_with_pagination_params(client, test_customers: List[Custo
     
     assert len(customers) >= 5
     for ind, customer in enumerate(customers):
-        assert customer == test_customers[ind + amount]
+        assert customer == test_customers[ind + per_page]
    
     assert count == len(test_customers)
-    assert total_pages == count // amount if count else 0
+    assert total_pages == count // per_page if count else 0
     assert res.status_code == status.HTTP_200_OK
 
 def test_get_customers_with_pagination_empty_page(client):
@@ -56,7 +56,7 @@ def test_get_customers_with_pagination_empty_page(client):
     assert len(content['data']) == 0
 
 def test_get_customers_with_wrong_pagination_params(client):
-    res = client.get(f'/customers/?amount=7&page=2')
+    res = client.get(f'/customers/?per_page=7&page=2')
 
     assert res.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 

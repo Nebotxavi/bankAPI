@@ -47,7 +47,7 @@ class PostgresStorage:
     def get_product(self, id) -> Product:
         ...
 
-    def get_customers_list(self, amount: int, page:int) -> CustomerList:
+    def get_customers_list(self, per_page: int, page:int) -> CustomerList:
         ...
 
     def get_customer_by_id(self, id: int) -> Customer:

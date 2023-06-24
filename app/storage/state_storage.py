@@ -64,10 +64,11 @@ class StateStorage:
         return product
 
     # TODO: review paginations (take it out of the method)
-    def get_customers_list(self, amount: int, page:int) -> CustomerList: 
-        customers: List[Customer] = self.customers_list[page*amount:page*amount+amount]
+    def get_customers_list(self, per_page: int, page:int) -> CustomerList: 
+        offset = page * per_page
+        customers: List[Customer] = self.customers_list[offset:offset+per_page]
         count: int = len(self.customers_list)
-        total_pages: int = count // amount
+        total_pages: int = count // per_page
         response = CustomerList(**{ 'data': customers, 'count': count, 'total_pages': total_pages })
         return response
 

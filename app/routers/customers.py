@@ -19,12 +19,12 @@ router = APIRouter(
 @router.get("/", response_model=CustomerList)
 def get_customers_list(
                        client=Depends(StorageAccess.get_db),
-                       amount: Literal['5', '10', '25'] = '10',
+                       per_page: Literal['5', '10', '25'] = '10',
                        page: Annotated[int, Query(gt=0)] = 1
                        ):
 
 
-    customers = client.get_customers_list(int(amount), page - 1)
+    customers = client.get_customers_list(int(per_page), page - 1)
     return customers
 
 

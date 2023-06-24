@@ -1,4 +1,4 @@
-from app.models.products import Product, ProductType
+from app.models.products import Product, ProductType, ProductList
 
 
 def test_get_all_products(client):
@@ -7,9 +7,14 @@ def test_get_all_products(client):
     def validate(product):
         return Product(**product)
 
-    products_map = map(validate, res.json())
+    content = res.json()
+
+    ProductList(**content)
+    products_map = map(validate, content['data'])
     products = list(products_map)
 
+    assert content.get('count', None) == None
+    assert content.get('total_pages', None) == None
     assert len(products)
     assert res.status_code == 200
 

@@ -1,6 +1,6 @@
 from fastapi import status
 from typing import List
-from app.models.customers import Customer, CustomerType, CustomerIn
+from app.models.customers import Customer, CustomerType, CustomerIn, CustomerList
 
 
 def test_get_customers(client, test_customers: List[Customer]):
@@ -8,13 +8,57 @@ def test_get_customers(client, test_customers: List[Customer]):
     res = client.get(f'/customers/')
 
     def validate(customer):
-        return Customer(**customer)
+        return Customer(**customer.dict())
 
-    customers_map = map(validate, res.json())
+    response = CustomerList(**res.json())
+
+    customers_map = map(validate, response.data)
     customers = list(customers_map)
+    count = response.count
+    total_pages = response.total_pages
 
-    assert len(customers) == len(test_customers)
+    assert count == len(test_customers)
+    assert total_pages == len(test_customers) // len(customers)
+    assert len(customers) > 0
     assert res.status_code == 200
+
+def test_get_customers_with_pagination_params(client, test_customers: List[Customer]):
+    amount = 5
+    page = 2
+
+    res = client.get(f'/customers/?amount={amount}&page={page}')
+
+    def validate(customer):
+        return Customer(**customer.dict())
+
+    response = CustomerList(**res.json())
+
+    customers_map = map(validate, response.data)
+    customers = list(customers_map)
+    count = response.count
+    total_pages = response.total_pages
+    
+    assert len(customers) >= 5
+    for ind, customer in enumerate(customers):
+        assert customer == test_customers[ind + amount]
+   
+    assert count == len(test_customers)
+    assert total_pages == count // amount if count else 0
+    assert res.status_code == status.HTTP_200_OK
+
+def test_get_customers_with_pagination_empty_page(client):
+    page = 8888888
+    res = client.get(f'/customers/?page={page}')
+
+    content = res.json()
+
+    assert res.status_code == status.HTTP_200_OK
+    assert len(content['data']) == 0
+
+def test_get_customers_with_wrong_pagination_params(client):
+    res = client.get(f'/customers/?amount=7&page=2')
+
+    assert res.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
 def test_get_customer(client, test_customers: List[Customer]):
@@ -168,6 +212,3 @@ def test_delete_wrong_customer(client, test_customers: List[Customer]):
     res = client.delete('customers/888888888')
 
     assert res.status_code == status.HTTP_404_NOT_FOUND
-
-
-# TOTEST: wrong customer_type

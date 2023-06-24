@@ -1,7 +1,9 @@
-from fastapi import APIRouter, Depends, status, HTTPException, Response
-from typing import List, Optional
+from fastapi import APIRouter, Depends, status, HTTPException, Response, Query, Path
+from typing import List, Optional, Literal
+from typing_extensions import Annotated
+from pydantic import Field
 
-from ..models.customers import Customer, CustomerIn, CustomerType
+from ..models.customers import Customer, CustomerIn, CustomerType, CustomerList
 from ..storage.storage import StorageAccess
 from ..exceptions.general_exceptions import noUniqueElement, resourceNotFound
 
@@ -14,19 +16,22 @@ router = APIRouter(
 # TODO: Add sort and implement other filters (just add pagination...)
 
 
-@router.get("/", response_model=List[Customer])
-def get_customers_list(client=Depends(StorageAccess.get_db),
-                       limit: int = 10,
-                       skip: int = 0,
-                       search: Optional[str] = ''):
+@router.get("/", response_model=CustomerList)
+def get_customers_list(
+                       client=Depends(StorageAccess.get_db),
+                       amount: Literal['5', '10', '25'] = '10',
+                       page: Annotated[int, Query(gt=0)] = 1
+                       ):
 
-    return client.get_customers_list()
+
+    customers = client.get_customers_list(int(amount), page - 1)
+    return customers
 
 
 @router.get("/{id}", response_model=Customer)
 def get_customer(id: str, client=Depends(StorageAccess.get_db)):
     try:
-        customer = client.get_customer_by_id(id)
+        customer: Customer = client.get_customer_by_id(id)
         return customer
 
     except resourceNotFound:
@@ -39,7 +44,7 @@ def get_customer(id: str, client=Depends(StorageAccess.get_db)):
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=Customer)
 def create_customer(customer: CustomerIn, client=Depends(StorageAccess.get_db)):
     try:
-        new_customer = client.create_customer(customer)
+        new_customer: Customer = client.create_customer(customer)
 
         return new_customer
 
@@ -53,7 +58,7 @@ def create_customer(customer: CustomerIn, client=Depends(StorageAccess.get_db)):
 @router.put("/{id}", response_model=Customer)
 def update_customer(id: str, customer: CustomerIn, client=Depends(StorageAccess.get_db)):
     try:
-        updated_customer = client.update_customer(id, customer)
+        updated_customer: Customer = client.update_customer(id, customer)
 
         return updated_customer
 

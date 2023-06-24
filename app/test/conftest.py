@@ -3,8 +3,9 @@ from typing import List
 import pytest
 
 
-from app.storage.storage import StorageFactory, DatabaseType, StorageAccess
+from app.storage.storage import StorageFactory, DatabaseType
 from app.models.customers import CustomerType, CustomerIn, Customer
+from app.models.products import Product
 from app.config import dbConfig
 from app.main import app
 
@@ -58,7 +59,7 @@ def client():
 
 
 @pytest.fixture
-def products():
+def products() -> List[Product]:
     client_state = app.state.db
 
     return client_state.products_list
@@ -67,6 +68,5 @@ def products():
 @pytest.fixture
 def test_customers() -> List[Customer]:
     client_state = app.state.db
-    customers = client_state.get_customers_list()
 
-    return customers
+    return client_state.customers_list

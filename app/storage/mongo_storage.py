@@ -1,10 +1,10 @@
 from pymongo.mongo_client import MongoClient
-from typing import List
+from typing import List, Dict, Union
 
 from ..config import DbConfig
 from ..models.general import Test
-from ..models.products import Product
-from ..models.customers import Customer, CustomerIn
+from ..models.products import Product, ProductList
+from ..models.customers import Customer, CustomerIn, CustomerList
 
 
 class MongoStorage:
@@ -15,13 +15,13 @@ class MongoStorage:
     def test_database(self) -> List[Test]:
         return list(self.client[self.database].health.find({},{'_id': 0}))
 
-    def get_products_list(self) -> List[Product]:
+    def get_products_list(self) -> ProductList:
         ...
 
     def get_product(self, id) -> Product:
         ...
 
-    def get_customers_list(self) -> List[Customer]:
+    def get_customers_list(self, amount: int, page:int) -> CustomerList:
         ...
 
     def get_customer_by_id(self, id: int) -> Customer:

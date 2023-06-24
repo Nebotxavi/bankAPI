@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from typing import List
 
-from ..models.products import Product
+from ..models.products import Product, ProductList
 from ..storage.storage import StorageAccess
 
 router = APIRouter(
@@ -10,7 +10,7 @@ router = APIRouter(
 )
 
 
-@router.get('/', response_model=List[Product])
+@router.get('/', response_model=ProductList)
 def get_products_list(client=Depends(StorageAccess.get_db)):
 
     products_list = client.get_products_list()

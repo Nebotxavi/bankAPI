@@ -1,6 +1,8 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 from enum import Enum
+
+from .general import PaginatedResponse
 
 
 class CustomerType(Enum):
@@ -23,3 +25,7 @@ class Customer(CustomerBase):
 
 class CustomerIn(CustomerBase):
     pass
+
+class CustomerList(PaginatedResponse):
+    data: List[Customer]
+    

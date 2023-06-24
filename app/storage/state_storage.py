@@ -1,13 +1,14 @@
 from fastapi import HTTPException, status
-from typing import List
+from typing import List, Dict, Union
 import uuid
 
 from ..config import DbConfig
-from ..models.products import ProductType, Product
-from ..models.customers import CustomerType, Customer, CustomerIn
+from ..models.products import ProductType, Product, ProductList
+from ..models.customers import Customer, CustomerIn, CustomerList
 from ..models.general import Test
 from ..exceptions.general_exceptions import noUniqueElement, resourceNotFound
 
+from ..data.customers import mock_customers_list
 
 class StateStorage:
 
@@ -21,26 +22,7 @@ class StateStorage:
         Product(id='2', type=ProductType.PLUS)
     ]
 
-    customers_list: List[Customer] = [
-        Customer(
-            id='bf18ad6a-6526-4e7c-9628-df1a555f1e4f',
-            personal_id="18438695C",
-            family_name="Pep",
-            middle_name=None,
-            surname="Botifarra",
-            additional_surname="Garcia",
-            customer_type=CustomerType.ANALYST
-        ),
-        Customer(
-            id='c2faccf6-b3cd-46a5-aff8-6ee2009317b3',
-            personal_id="38528899F",
-            family_name="Ruben",
-            middle_name="Von",
-            surname="Rnauf",
-            additional_surname=None,
-            customer_type=CustomerType.STANDARD
-        )
-    ]
+    customers_list: List[Customer] = mock_customers_list
 
     def __init__(self, dbConfig: DbConfig) -> None:
         pass
@@ -68,8 +50,9 @@ class StateStorage:
     def test_database(self) -> List[Test]:
         return self.test_list
 
-    def get_products_list(self) -> List[Product]:
-        return self.products_list
+    def get_products_list(self) -> ProductList:
+        products = self.products_list
+        return ProductList(data=products)
 
     def get_product(self, id) -> Product:
         product = next((x for x in self.products_list if x.id == id), None)
@@ -80,9 +63,13 @@ class StateStorage:
 
         return product
 
-    # TODO: implement pagination
-    def get_customers_list(self) -> List[Customer]:
-        return self.customers_list
+    # TODO: review paginations (take it out of the method)
+    def get_customers_list(self, amount: int, page:int) -> CustomerList: 
+        customers: List[Customer] = self.customers_list[page*amount:page*amount+amount]
+        count: int = len(self.customers_list)
+        total_pages: int = count // amount
+        response = CustomerList(**{ 'data': customers, 'count': count, 'total_pages': total_pages })
+        return response
 
     def get_customer_by_id(self, id: int) -> Customer:
         customer = next((x for x in self.customers_list if x.id == id), None)

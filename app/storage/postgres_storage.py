@@ -4,8 +4,8 @@ from psycopg2.extensions import cursor
 from typing import List, Any
 
 from ..config import DbConfig
-from ..models.products import Product
-from ..models.customers import Customer, CustomerIn
+from ..models.products import Product, ProductList
+from ..models.customers import Customer, CustomerIn, CustomerList
 
 # TODO: switch to SQL alchemy (engine, session_local, base...)
 
@@ -41,13 +41,13 @@ class PostgresStorage:
         self.client.execute(''' SELECT * FROM health ''')
         return self.client.fetchall()
 
-    def get_products_list(self) -> List[Product]:
+    def get_products_list(self) -> ProductList:
         ...
 
     def get_product(self, id) -> Product:
         ...
 
-    def get_customers_list(self) -> List[Customer]:
+    def get_customers_list(self, amount: int, page:int) -> CustomerList:
         ...
 
     def get_customer_by_id(self, id: int) -> Customer:

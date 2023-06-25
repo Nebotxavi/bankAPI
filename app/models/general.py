@@ -15,4 +15,6 @@ class ListResponse(GenericModel, Generic[M]):
 class PaginatedResponse(ListResponse):
     count: Optional[int] = None
     total_pages: Optional[int] = None
+    next_page: Optional[str] = None
+    previous_page: Optional[str] = None
 

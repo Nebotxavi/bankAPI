@@ -7,8 +7,8 @@ from ..models.products import ProductType, Product, ProductList
 from ..models.customers import Customer, CustomerIn, CustomerList
 from ..models.general import Test
 from ..exceptions.general_exceptions import noUniqueElement, resourceNotFound
-
 from ..data.customers import mock_customers_list
+from ..middleware.middleware import request_object
 
 class StateStorage:
 
@@ -27,6 +27,9 @@ class StateStorage:
     def __init__(self, dbConfig: DbConfig) -> None:
         pass
 
+    # TODO: consider create a class
+    # TODO: type it
+    # TODO: test it
     def _get_new_id(self, items, key) -> str:
         new_id = str(uuid.uuid4())
         all_ids = list(map(lambda elem: getattr(elem, key), items))
@@ -36,7 +39,10 @@ class StateStorage:
 
         else:
             return self._get_new_id(items, key)
-
+    
+    # TODO: consider create a class
+    # TODO: type it
+    # TODO: test it
     def _validate_personal_id(self, id: str, exception: List[str] = []):
         all_ids = list(
             map(lambda customer: customer.personal_id if customer.personal_id not in exception else '', self.customers_list))
@@ -62,15 +68,42 @@ class StateStorage:
                                 detail=f"Product with id: {id} was not found")
 
         return product
+    
+    # TODO: consider create a class
+    # TODO: type it
+    # TODO: test it
+    def _get_url(self, params):
+        request = request_object.get()
+        return request.url.include_query_params(**params)
 
-    # TODO: review paginations (take it out of the method)
-    def get_customers_list(self, per_page: int, page:int) -> CustomerList: 
-        offset = page * per_page
-        customers: List[Customer] = self.customers_list[offset:offset+per_page]
-        count: int = len(self.customers_list)
-        total_pages: int = count // per_page
-        response = CustomerList(**{ 'data': customers, 'count': count, 'total_pages': total_pages })
+    # TODO: consider create a class
+    # TODO: type it
+    # TODO: test it
+    def _paginate(self, dataset_list, page, per_page):
+        index_page = page - 1
+        offset = index_page * per_page
+        data: List = dataset_list[offset:offset+per_page]
+        count: int = len(dataset_list)
+        total_pages: int = count // per_page + 1 if count % per_page else count // per_page
+        
+        response = {"data": data, "count": count, "total_pages": total_pages}
+        if page < total_pages:
+            url = self._get_url({'page': page + 1})
+            response['next_page'] = str(url)
+        if page > 1:
+            url = self._get_url({'page': page - 1})
+            response['previous_page'] = str(url)
+
         return response
+
+    def get_customers_list(self, per_page: int, page:int) -> CustomerList: 
+        
+        dataset: List[Customer] = self.customers_list
+        response = self._paginate(dataset, page, per_page)
+
+        parsed_response = CustomerList(**response)
+
+        return parsed_response
 
     def get_customer_by_id(self, id: int) -> Customer:
         customer = next((x for x in self.customers_list if x.id == id), None)

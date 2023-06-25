@@ -4,8 +4,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from .config import dbConfig
 from .storage.storage import DatabaseType, StorageFactory
 from .routers import test, products, customers
+from .middleware.middleware import middleware
 
-app = FastAPI()
+app = FastAPI(middleware=middleware)
 
 origins = ['*']
 

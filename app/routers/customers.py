@@ -24,7 +24,7 @@ def get_customers_list(
                        ):
 
 
-    customers = client.get_customers_list(int(per_page), page - 1)
+    customers = client.get_customers_list(int(per_page), page)
     return customers
 
 

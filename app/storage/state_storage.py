@@ -1,16 +1,71 @@
 from fastapi import HTTPException, status
-from typing import List, Dict, Union
+from typing import List, Dict, Union, Any, TypeVar, Generic
 import uuid
 
 from ..config import DbConfig
 from ..models.products import ProductType, Product, ProductList
 from ..models.customers import Customer, CustomerIn, CustomerList
-from ..models.general import Test
+from ..models.general import Test, PaginatedObject
 from ..exceptions.general_exceptions import noUniqueElement, resourceNotFound
 from ..data.customers import mock_customers_list
 from ..middleware.middleware import request_object
 
-class StateStorage:
+T = TypeVar('T')
+
+class Paginator(Generic[T]):
+
+    def __init__(self, dataset_list: List[T], page: int, per_page: int):
+        self.dataset_list = dataset_list
+        self.page = page
+        self.per_page = per_page
+        self.offset = (page - 1) * per_page
+        self.count = len(dataset_list)
+        self.request = request_object.get()
+
+        self.total_pages = 0
+
+    def _get_url(self, params):
+        return self.request.url.include_query_params(**params)
+
+    def _get_paginated_dataset(self) -> List[T]:
+        return self.dataset_list[self.offset : self.offset + self.per_page]
+
+    def _get_total_pages(self) -> int:
+        total_pages = self.count // self.per_page + 1 if self.count % self.per_page else self.count // self.per_page
+        self.total_pages = total_pages
+        return self.total_pages
+
+    def _get_next_page(self) -> Union[str, None]:
+        if self.page < self.total_pages:
+            url = self._get_url({'page': self.page + 1})
+            return str(url) 
+        else:
+            return None
+
+    def _get_previous_page(self) -> Union[str, None]:
+        if self.page > 1:
+            url = self._get_url({'page': self.page -1})
+            return str(url) 
+        else:
+            return None 
+
+    def get_pagination(self) -> PaginatedObject:
+        data = self._get_paginated_dataset()
+        total_pages: int = self._get_total_pages()
+        next_page: Union[str, None] = self._get_next_page()
+        previous_page: Union[str, None] = self._get_previous_page()
+
+        return PaginatedObject(**{
+            "data": data,
+            'count': self.count,
+            'total_pages': total_pages,
+            'next_page': next_page,
+            'previous_page': previous_page
+        })
+
+
+
+class StateStorage():
 
     test_list = [
         Test(name='Pepi', test=77),
@@ -26,6 +81,12 @@ class StateStorage:
 
     def __init__(self, dbConfig: DbConfig) -> None:
         pass
+
+    # TODO: type it
+    # TODO: test it
+    def _paginate(self, dataset_list: List[Any], page: int, per_page: int):
+        paginator = Paginator[T](dataset_list, page, per_page)
+        return paginator.get_pagination()
 
     # TODO: consider create a class
     # TODO: type it
@@ -68,33 +129,6 @@ class StateStorage:
                                 detail=f"Product with id: {id} was not found")
 
         return product
-    
-    # TODO: consider create a class
-    # TODO: type it
-    # TODO: test it
-    def _get_url(self, params):
-        request = request_object.get()
-        return request.url.include_query_params(**params)
-
-    # TODO: consider create a class
-    # TODO: type it
-    # TODO: test it
-    def _paginate(self, dataset_list, page, per_page):
-        index_page = page - 1
-        offset = index_page * per_page
-        data: List = dataset_list[offset:offset+per_page]
-        count: int = len(dataset_list)
-        total_pages: int = count // per_page + 1 if count % per_page else count // per_page
-        
-        response = {"data": data, "count": count, "total_pages": total_pages}
-        if page < total_pages:
-            url = self._get_url({'page': page + 1})
-            response['next_page'] = str(url)
-        if page > 1:
-            url = self._get_url({'page': page - 1})
-            response['previous_page'] = str(url)
-
-        return response
 
     def get_customers_list(self, per_page: int, page:int) -> CustomerList: 
         

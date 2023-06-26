@@ -18,7 +18,7 @@ def test_get_customers(client, test_customers: List[Customer]):
     total_pages = response.total_pages
 
     assert count == len(test_customers)
-    assert total_pages == len(test_customers) // len(customers)
+    assert total_pages ==  len(test_customers) // len(customers) + 1 if len(test_customers) % len(customers) else len(test_customers) // len(customers)
     assert len(customers) > 0
     assert res.status_code == 200
 
@@ -43,7 +43,8 @@ def test_get_customers_with_pagination_params(client, test_customers: List[Custo
         assert customer == test_customers[ind + per_page]
    
     assert count == len(test_customers)
-    assert total_pages == count // per_page if count else 0
+    if count:
+        assert total_pages == count // per_page + 1 if count % per_page else count // per_page
     assert res.status_code == status.HTTP_200_OK
 
 def test_get_customers_with_pagination_empty_page(client):

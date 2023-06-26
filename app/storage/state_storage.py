@@ -1,5 +1,5 @@
 from fastapi import HTTPException, status
-from typing import List, Dict, Union, Any, TypeVar, Generic
+from typing import List, Dict, Any, TypeVar, Generic
 import uuid
 
 from ..config import DbConfig
@@ -11,6 +11,7 @@ from ..data.customers import mock_customers_list
 from ..middleware.middleware import request_object
 
 T = TypeVar('T')
+
 
 class Paginator(Generic[T]):
 
@@ -28,32 +29,33 @@ class Paginator(Generic[T]):
         return self.request.url.include_query_params(**params)
 
     def _get_paginated_dataset(self) -> List[T]:
-        return self.dataset_list[self.offset : self.offset + self.per_page]
+        return self.dataset_list[self.offset: self.offset + self.per_page]
 
     def _get_total_pages(self) -> int:
-        total_pages = self.count // self.per_page + 1 if self.count % self.per_page else self.count // self.per_page
+        total_pages = self.count // self.per_page + \
+            1 if self.count % self.per_page else self.count // self.per_page
         self.total_pages = total_pages
         return self.total_pages
 
-    def _get_next_page(self) -> Union[str, None]:
+    def _get_next_page(self) -> str | None:
         if self.page < self.total_pages:
             url = self._get_url({'page': self.page + 1})
-            return str(url) 
+            return str(url)
         else:
             return None
 
-    def _get_previous_page(self) -> Union[str, None]:
+    def _get_previous_page(self) -> str | None:
         if self.page > 1:
-            url = self._get_url({'page': self.page -1})
-            return str(url) 
+            url = self._get_url({'page': self.page - 1})
+            return str(url)
         else:
-            return None 
+            return None
 
     def get_pagination(self) -> PaginatedObject:
         data = self._get_paginated_dataset()
         total_pages: int = self._get_total_pages()
-        next_page: Union[str, None] = self._get_next_page()
-        previous_page: Union[str, None] = self._get_previous_page()
+        next_page: str | None = self._get_next_page()
+        previous_page: str | None = self._get_previous_page()
 
         return PaginatedObject(**{
             "data": data,
@@ -64,8 +66,7 @@ class Paginator(Generic[T]):
         })
 
 
-
-class StateStorage():
+class StateStorage(Generic[T]):
 
     test_list = [
         Test(name='Pepi', test=77),
@@ -82,9 +83,8 @@ class StateStorage():
     def __init__(self, dbConfig: DbConfig) -> None:
         pass
 
-    # TODO: type it
     # TODO: test it
-    def _paginate(self, dataset_list: List[Any], page: int, per_page: int):
+    def _paginate(self, dataset_list: List[T], page: int, per_page: int):
         paginator = Paginator[T](dataset_list, page, per_page)
         return paginator.get_pagination()
 
@@ -100,7 +100,7 @@ class StateStorage():
 
         else:
             return self._get_new_id(items, key)
-    
+
     # TODO: consider create a class
     # TODO: type it
     # TODO: test it
@@ -130,8 +130,8 @@ class StateStorage():
 
         return product
 
-    def get_customers_list(self, per_page: int, page:int) -> CustomerList: 
-        
+    def get_customers_list(self, per_page: int, page: int) -> CustomerList:
+
         dataset: List[Customer] = self.customers_list
         response = self._paginate(dataset, page, per_page)
 
@@ -187,7 +187,7 @@ class StateStorage():
 
         return self.customers_list[customer_index]
 
-    def delete_customer(self, id:str) -> None:
+    def delete_customer(self, id: str) -> None:
         customer_index = next((ind for ind, customer in enumerate(
             self.customers_list) if customer.id == id), None)
 
@@ -195,4 +195,3 @@ class StateStorage():
             raise resourceNotFound
 
         del self.customers_list[customer_index]
-

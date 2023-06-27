@@ -5,17 +5,15 @@ import uuid
 from ..config import DbConfig
 from ..models.products import ProductType, Product, ProductList
 from ..models.customers import Customer, CustomerIn, CustomerList
-from ..models.general import Test, PaginatedObject
+from ..models.general import Test, PaginatedResponse
 from ..exceptions.general_exceptions import noUniqueElement, resourceNotFound
 from ..data.customers import mock_customers_list
 from ..middleware.middleware import request_object
 
-T = TypeVar('T')
 
+class Paginator():
 
-class Paginator(Generic[T]):
-
-    def __init__(self, dataset_list: List[T], page: int, per_page: int):
+    def __init__(self, dataset_list: List, page: int, per_page: int):
         self.dataset_list = dataset_list
         self.page = page
         self.per_page = per_page
@@ -28,7 +26,7 @@ class Paginator(Generic[T]):
     def _get_url(self, params):
         return self.request.url.include_query_params(**params)
 
-    def _get_paginated_dataset(self) -> List[T]:
+    def _get_paginated_dataset(self) -> List:
         return self.dataset_list[self.offset: self.offset + self.per_page]
 
     def _get_total_pages(self) -> int:
@@ -51,13 +49,13 @@ class Paginator(Generic[T]):
         else:
             return None
 
-    def get_pagination(self) -> PaginatedObject:
+    def get_pagination(self):
         data = self._get_paginated_dataset()
         total_pages: int = self._get_total_pages()
         next_page: str | None = self._get_next_page()
         previous_page: str | None = self._get_previous_page()
 
-        return PaginatedObject(**{
+        return PaginatedResponse(**{
             "data": data,
             'count': self.count,
             'total_pages': total_pages,
@@ -66,34 +64,30 @@ class Paginator(Generic[T]):
         })
 
 
-class StateStorage(Generic[T]):
-
-    test_list = [
-        Test(name='Pepi', test=77),
-        Test(name='SuperTest', test=99)
-    ]
-
-    products_list = [
-        Product(id='1', type=ProductType.BASIC),
-        Product(id='2', type=ProductType.PLUS)
-    ]
-
-    customers_list: List[Customer] = mock_customers_list
+class StateStorage():
 
     def __init__(self, dbConfig: DbConfig) -> None:
-        pass
+        self.test_list = [
+            Test(name='Pepi', test=77),
+            Test(name='SuperTest', test=99)
+        ]
 
-    # TODO: test it
-    def _paginate(self, dataset_list: List[T], page: int, per_page: int):
-        paginator = Paginator[T](dataset_list, page, per_page)
+        self.products_list = [
+            Product(id='1', type=ProductType.BASIC),
+            Product(id='2', type=ProductType.PLUS)
+        ]
+
+        self.customers_list: List[Customer] = mock_customers_list
+
+    def _paginate(self, dataset_list: List, page: int, per_page: int):
+        paginator = Paginator(dataset_list, page, per_page)
         return paginator.get_pagination()
 
-    # TODO: consider create a class
-    # TODO: type it
-    # TODO: test it
-    def _get_new_id(self, items, key) -> str:
+    # TODO: consider move to utils
+    # TODO: make it incremental (maybe new class)
+    def _get_new_id(self, items: List, key: str) -> str:
         new_id = str(uuid.uuid4())
-        all_ids = list(map(lambda elem: getattr(elem, key), items))
+        all_ids: List = list(map(lambda elem: getattr(elem, key), items))
 
         if new_id not in all_ids:
             return new_id
@@ -101,10 +95,7 @@ class StateStorage(Generic[T]):
         else:
             return self._get_new_id(items, key)
 
-    # TODO: consider create a class
-    # TODO: type it
-    # TODO: test it
-    def _validate_personal_id(self, id: str, exception: List[str] = []):
+    def _validate_personal_id(self, id: str, exception: List[str] = []) -> bool:
         all_ids = list(
             map(lambda customer: customer.personal_id if customer.personal_id not in exception else '', self.customers_list))
 
@@ -121,7 +112,7 @@ class StateStorage(Generic[T]):
         products = self.products_list
         return ProductList(data=products)
 
-    def get_product(self, id) -> Product:
+    def get_product_by_id(self, id) -> Product:
         product = next((x for x in self.products_list if x.id == id), None)
 
         if not product:
@@ -135,7 +126,7 @@ class StateStorage(Generic[T]):
         dataset: List[Customer] = self.customers_list
         response = self._paginate(dataset, page, per_page)
 
-        parsed_response = CustomerList(**response)
+        parsed_response = CustomerList(**response.dict())
 
         return parsed_response
 

@@ -20,6 +20,6 @@ def get_products_list(client=Depends(StorageAccess.get_db)):
 
 @router.get('/{id}/', response_model=Product)
 def get_product(id: str, client=Depends(StorageAccess.get_db)):
-    product = client.get_product(id)
+    product = client.get_product_by_id(id)
 
     return product

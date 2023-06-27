@@ -28,7 +28,7 @@ class Storage(Protocol):
     def get_products_list(self) -> ProductList:
         ...
 
-    def get_product(self, id) -> Product:
+    def get_product_by_id(self, id) -> Product:
         ...
 
     def get_customers_list(self, per_page: int, page: int) -> CustomerList:

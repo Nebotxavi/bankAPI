@@ -69,7 +69,6 @@ def test_get_customers_with_wrong_pagination_params(client):
 
 def test_get_customer(client, test_customers: List[Customer]):
     res = client.get(f'/customers/{test_customers[0].id}')
-
     customer = Customer.parse_obj(res.json())
 
     assert res.status_code == status.HTTP_200_OK
@@ -107,6 +106,23 @@ def test_create_customer(client):
     assert received_customer.additional_surname == new_customer['additional_surname']
     assert received_customer.customer_type == CustomerType(
         new_customer['customer_type'])
+
+
+def test_new_customer_ID_is_higher_than_previous(client, test_customers: List[Customer]):
+    new_customer = {
+        "personal_id": "2233869KD",
+        "family_name": "Antionet",
+        "surname": "Hazel",
+        "additional_surname": "Vilar",
+        "customer_type": "Analyst"
+    }
+
+    res = client.post('/customers/', json=new_customer)
+
+    received_customer = Customer.parse_obj(res.json())
+
+    assert res.status_code == status.HTTP_201_CREATED
+    assert int(received_customer.id) > int(test_customers[-2].id)
 
 
 def test_create_wrong_customer(client):
@@ -153,6 +169,24 @@ def test_update_customer(client, test_customers: List[Customer]):
 
     assert res.status_code == status.HTTP_200_OK
     assert received_customer.family_name == updated_customer['family_name']
+
+
+def test_updated_with_wrong_id(client, test_customers: List[Customer]):
+    current_customer = test_customers[0]
+
+    updated_customer = {
+        "personal_id": current_customer.personal_id,
+        "family_name": 'Walden',
+        "middle_name": current_customer.middle_name,
+        "surname": current_customer.surname,
+        "additional_surname": current_customer.additional_surname,
+        "customer_type": current_customer.customer_type.value
+    }
+
+    res = client.put(
+        f'/customers/8888888', json=updated_customer)
+
+    assert res.status_code == status.HTTP_404_NOT_FOUND
 
 
 def test_update_with_wrong_data(client, test_customers: List[Customer]):

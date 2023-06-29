@@ -22,11 +22,11 @@ class CustomerBase(BaseModel):
 
 
 class Customer(CustomerBase):
-    id: str
+    id: int
 
 
 class NewCustomer(CustomerBase):
-    id: str = Field(default_factory=IdGenerator.get_id)
+    id: int = Field(default_factory=IdGenerator.get_id)
 
 
 class CustomerIn(CustomerBase):

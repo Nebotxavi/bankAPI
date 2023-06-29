@@ -1,14 +1,14 @@
 from fastapi import HTTPException, status
 from starlette.datastructures import URL
 from typing import List
-import uuid
 
 from ..config import DbConfig
-from ..models.products import ProductType, Product, ProductList
+from ..models.products import Product, ProductList
 from ..models.customers import Customer, CustomerIn, CustomerList, NewCustomer
 from ..models.general import Test, PaginatedResponse
 from ..exceptions.general_exceptions import noUniqueElement, resourceNotFound
 from ..data.customers import mock_parsed_customers
+from ..data.products import mock_parsed_products
 from ..middleware.middleware import request_object
 
 
@@ -73,27 +73,19 @@ class StateStorage():
             Test(name='SuperTest', test=99)
         ]
 
-        self.products_list = [
-            Product(id='1', type=ProductType.BASIC),
-            Product(id='2', type=ProductType.PLUS)
-        ]
+        self.products_list: List[Product] = [Product.parse_obj(
+            product.dict()) for product in mock_parsed_products]
 
-        self.customers_list: List[Customer] = list(
-            map(lambda elem: Customer.parse_obj(elem.dict()), mock_parsed_customers))
+        self.customers_list: List[Customer] = [Customer.parse_obj(
+            customer.dict()) for customer in mock_parsed_customers]
 
     def _paginate(self, dataset_list: List, page: int, per_page: int) -> PaginatedResponse:
         paginator = Paginator(dataset_list, page, per_page)
         return paginator.get_pagination()
 
-    def _get_latest_id(self, items: List, key: str) -> str | None:
-        if len(items):
-            getattr(items[-1], key, None)
-        else:
-            return None
-
     def _validate_personal_id(self, id: str, exception: List[str] = []) -> bool:
-        all_ids = list(
-            map(lambda customer: customer.personal_id if customer.personal_id not in exception else '', self.customers_list))
+        all_ids = [
+            customer.personal_id if customer.personal_id not in exception else '' for customer in self.customers_list]
 
         if id in all_ids:
             return False
@@ -147,7 +139,6 @@ class StateStorage():
 
         return new_customer
 
-# TODO: review method
     def update_customer(self, id: str, customer: CustomerIn) -> Customer:
         customer_index = next((ind for ind, customer in enumerate(
             self.customers_list) if customer.id == id), None)

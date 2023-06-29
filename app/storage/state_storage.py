@@ -1,13 +1,14 @@
 from fastapi import HTTPException, status
-from typing import List, Dict, Any, TypeVar, Generic
+from starlette.datastructures import URL
+from typing import List
 import uuid
 
 from ..config import DbConfig
 from ..models.products import ProductType, Product, ProductList
-from ..models.customers import Customer, CustomerIn, CustomerList
+from ..models.customers import Customer, CustomerIn, CustomerList, NewCustomer
 from ..models.general import Test, PaginatedResponse
 from ..exceptions.general_exceptions import noUniqueElement, resourceNotFound
-from ..data.customers import mock_customers_list
+from ..data.customers import mock_parsed_customers
 from ..middleware.middleware import request_object
 
 
@@ -23,7 +24,7 @@ class Paginator():
 
         self.total_pages = 0
 
-    def _get_url(self, params):
+    def _get_url(self, params) -> URL:
         return self.request.url.include_query_params(**params)
 
     def _get_paginated_dataset(self) -> List:
@@ -49,13 +50,13 @@ class Paginator():
         else:
             return None
 
-    def get_pagination(self):
+    def get_pagination(self) -> PaginatedResponse:
         data = self._get_paginated_dataset()
         total_pages: int = self._get_total_pages()
         next_page: str | None = self._get_next_page()
         previous_page: str | None = self._get_previous_page()
 
-        return PaginatedResponse(**{
+        return PaginatedResponse.parse_obj({
             "data": data,
             'count': self.count,
             'total_pages': total_pages,
@@ -77,23 +78,18 @@ class StateStorage():
             Product(id='2', type=ProductType.PLUS)
         ]
 
-        self.customers_list: List[Customer] = mock_customers_list
+        self.customers_list: List[Customer] = list(
+            map(lambda elem: Customer.parse_obj(elem.dict()), mock_parsed_customers))
 
-    def _paginate(self, dataset_list: List, page: int, per_page: int):
+    def _paginate(self, dataset_list: List, page: int, per_page: int) -> PaginatedResponse:
         paginator = Paginator(dataset_list, page, per_page)
         return paginator.get_pagination()
 
-    # TODO: consider move to utils
-    # TODO: make it incremental (maybe new class)
-    def _get_new_id(self, items: List, key: str) -> str:
-        new_id = str(uuid.uuid4())
-        all_ids: List = list(map(lambda elem: getattr(elem, key), items))
-
-        if new_id not in all_ids:
-            return new_id
-
+    def _get_latest_id(self, items: List, key: str) -> str | None:
+        if len(items):
+            getattr(items[-1], key, None)
         else:
-            return self._get_new_id(items, key)
+            return None
 
     def _validate_personal_id(self, id: str, exception: List[str] = []) -> bool:
         all_ids = list(
@@ -126,7 +122,7 @@ class StateStorage():
         dataset: List[Customer] = self.customers_list
         response = self._paginate(dataset, page, per_page)
 
-        parsed_response = CustomerList(**response.dict())
+        parsed_response = CustomerList.parse_obj(response.dict())
 
         return parsed_response
 
@@ -144,13 +140,14 @@ class StateStorage():
         if not is_personal_id_valid:
             raise noUniqueElement
 
-        new_id = self._get_new_id(self.customers_list, 'id')
+        customer_with_id = NewCustomer.parse_obj(customer.dict())
+        new_customer = Customer.parse_obj(customer_with_id.dict())
 
-        new_customer = Customer(**{'id': new_id, **customer.dict()})
         self.customers_list.append(new_customer)
 
         return new_customer
 
+# TODO: review method
     def update_customer(self, id: str, customer: CustomerIn) -> Customer:
         customer_index = next((ind for ind, customer in enumerate(
             self.customers_list) if customer.id == id), None)
@@ -172,7 +169,7 @@ class StateStorage():
             **customer.dict()
         }
 
-        validated_customer = Customer(**updated_customer)
+        validated_customer = Customer.parse_obj(updated_customer)
 
         self.customers_list[customer_index] = validated_customer
 

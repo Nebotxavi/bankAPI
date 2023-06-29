@@ -1,6 +1,8 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional, List
 from enum import Enum
+
+from app.utils.utils import IdGenerator
 
 from .general import PaginatedResponse
 
@@ -23,9 +25,13 @@ class Customer(CustomerBase):
     id: str
 
 
+class NewCustomer(CustomerBase):
+    id: str = Field(default_factory=IdGenerator.get_id)
+
+
 class CustomerIn(CustomerBase):
     pass
 
+
 class CustomerList(PaginatedResponse):
     data: List[Customer]
-    

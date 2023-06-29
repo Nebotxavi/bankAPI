@@ -43,7 +43,7 @@ def create_test_customers():
     ]
 
     for test_customer in test_customers_list:
-        customer = CustomerIn(**test_customer)
+        customer = CustomerIn.parse_obj(test_customer)
 
         new_customer = client_state.create_customer(customer)
         customers.append(new_customer)

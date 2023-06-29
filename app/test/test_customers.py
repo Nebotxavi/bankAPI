@@ -8,9 +8,9 @@ def test_get_customers(client, test_customers: List[Customer]):
     res = client.get(f'/customers/')
 
     def validate(customer):
-        return Customer(**customer.dict())
+        return Customer.parse_obj(customer.dict())
 
-    response = CustomerList(**res.json())
+    response = CustomerList.parse_obj(res.json())
 
     customers_map = map(validate, response.data)
     customers = list(customers_map)
@@ -18,9 +18,11 @@ def test_get_customers(client, test_customers: List[Customer]):
     total_pages = response.total_pages
 
     assert count == len(test_customers)
-    assert total_pages ==  len(test_customers) // len(customers) + 1 if len(test_customers) % len(customers) else len(test_customers) // len(customers)
+    assert total_pages == len(test_customers) // len(customers) + 1 if len(
+        test_customers) % len(customers) else len(test_customers) // len(customers)
     assert len(customers) > 0
     assert res.status_code == 200
+
 
 def test_get_customers_with_pagination_params(client, test_customers: List[Customer]):
     per_page = 5
@@ -29,23 +31,25 @@ def test_get_customers_with_pagination_params(client, test_customers: List[Custo
     res = client.get(f'/customers/?per_page={per_page}&page={page}')
 
     def validate(customer):
-        return Customer(**customer.dict())
+        return Customer.parse_obj(customer.dict())
 
-    response = CustomerList(**res.json())
+    response = CustomerList.parse_obj(res.json())
 
     customers_map = map(validate, response.data)
     customers = list(customers_map)
     count = response.count
     total_pages = response.total_pages
-    
+
     assert len(customers) >= 5
     for ind, customer in enumerate(customers):
         assert customer == test_customers[ind + per_page]
-   
+
     assert count == len(test_customers)
     if count:
-        assert total_pages == count // per_page + 1 if count % per_page else count // per_page
+        assert total_pages == count // per_page + \
+            1 if count % per_page else count // per_page
     assert res.status_code == status.HTTP_200_OK
+
 
 def test_get_customers_with_pagination_empty_page(client):
     page = 8888888
@@ -56,6 +60,7 @@ def test_get_customers_with_pagination_empty_page(client):
     assert res.status_code == status.HTTP_200_OK
     assert len(content['data']) == 0
 
+
 def test_get_customers_with_wrong_pagination_params(client):
     res = client.get(f'/customers/?per_page=7&page=2')
 
@@ -65,7 +70,7 @@ def test_get_customers_with_wrong_pagination_params(client):
 def test_get_customer(client, test_customers: List[Customer]):
     res = client.get(f'/customers/{test_customers[0].id}')
 
-    customer = Customer(**res.json())
+    customer = Customer.parse_obj(res.json())
 
     assert res.status_code == status.HTTP_200_OK
     assert customer.id == test_customers[0].id
@@ -94,7 +99,7 @@ def test_create_customer(client):
 
     res = client.post('/customers/', json=new_customer)
 
-    received_customer = Customer(**res.json())
+    received_customer = Customer.parse_obj(res.json())
 
     assert res.status_code == status.HTTP_201_CREATED
     assert received_customer.personal_id == new_customer['personal_id']
@@ -144,7 +149,7 @@ def test_update_customer(client, test_customers: List[Customer]):
 
     res = client.put(
         f'/customers/{test_customers[0].id}', json=updated_customer)
-    received_customer = Customer(**res.json())
+    received_customer = Customer.parse_obj(res.json())
 
     assert res.status_code == status.HTTP_200_OK
     assert received_customer.family_name == updated_customer['family_name']
@@ -197,7 +202,7 @@ def test_update_with_blank_optional_data(client, test_customers: List[Customer])
 
     res = client.put(
         f'/customers/{test_customers[0].id}', json=updated_customer)
-    received_customer = Customer(**res.json())
+    received_customer = Customer.parse_obj(res.json())
 
     assert res.status_code == status.HTTP_200_OK
     assert received_customer.middle_name == None
@@ -208,6 +213,7 @@ def test_delete_customer(client, test_customers: List[Customer]):
     res = client.delete(f'/customers/{test_customers[0].id}')
 
     assert res.status_code == status.HTTP_204_NO_CONTENT
+
 
 def test_delete_wrong_customer(client, test_customers: List[Customer]):
     res = client.delete('customers/888888888')

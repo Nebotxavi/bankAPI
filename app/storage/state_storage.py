@@ -27,23 +27,23 @@ class Paginator:
     def _get_url(self, params) -> URL:
         return HrefProvider.get_url_with_params(params)
 
-    def _get_paginated_dataset(self) -> List:
+    def __get_paginated_dataset(self) -> List:
         return self.dataset_list[self.offset: self.offset + self.per_page]
 
-    def _get_total_pages(self) -> int:
+    def __get_total_pages(self) -> int:
         total_pages = self.count // self.per_page + \
             1 if self.count % self.per_page else self.count // self.per_page
         self.total_pages = total_pages
         return self.total_pages
 
-    def _get_next_page(self) -> str | None:
+    def __get_next_page(self) -> str | None:
         if self.page < self.total_pages:
             url = self._get_url({'page': self.page + 1})
             return str(url)
         else:
             return None
 
-    def _get_previous_page(self) -> str | None:
+    def __get_previous_page(self) -> str | None:
         if self.page > 1:
             url = self._get_url({'page': self.page - 1})
             return str(url)
@@ -51,10 +51,10 @@ class Paginator:
             return None
 
     def get_pagination(self) -> PaginatedResponse:
-        data = self._get_paginated_dataset()
-        total_pages: int = self._get_total_pages()
-        next_page: str | None = self._get_next_page()
-        previous_page: str | None = self._get_previous_page()
+        data = self.__get_paginated_dataset()
+        total_pages: int = self.__get_total_pages()
+        next_page: str | None = self.__get_next_page()
+        previous_page: str | None = self.__get_previous_page()
 
         return PaginatedResponse.parse_obj({
             "data": data,
@@ -79,11 +79,11 @@ class StateStorage():
         self.customers_list: List[Customer] = [Customer.parse_obj(
             customer.dict()) for customer in mock_parsed_customers]
 
-    def _paginate(self, dataset_list: List, page: int, per_page: int) -> PaginatedResponse:
+    def __paginate(self, dataset_list: List, page: int, per_page: int) -> PaginatedResponse:
         paginator = Paginator(dataset_list, page, per_page)
         return paginator.get_pagination()
 
-    def _validate_personal_id(self, id: str, exception: List[str] = []) -> bool:
+    def __validate_personal_id(self, id: str, exception: List[str] = []) -> bool:
         all_ids = [
             customer.personal_id if customer.personal_id not in exception else '' for customer in self.customers_list]
 
@@ -112,7 +112,7 @@ class StateStorage():
     def get_customers_list(self, per_page: int, page: int) -> CustomerPagination:
 
         dataset: List[Customer] = self.customers_list
-        response = self._paginate(dataset, page, per_page)
+        response = self.__paginate(dataset, page, per_page)
 
         parsed_response = CustomerPagination.parse_obj(response.dict())
 
@@ -127,7 +127,8 @@ class StateStorage():
         return customer
 
     def create_customer(self, customer: CustomerIn) -> Customer:
-        is_personal_id_valid = self._validate_personal_id(customer.personal_id)
+        is_personal_id_valid = self.__validate_personal_id(
+            customer.personal_id)
 
         if not is_personal_id_valid:
             raise noUniqueElement
@@ -149,7 +150,7 @@ class StateStorage():
         current_customer = self.customers_list[customer_index]
 
         if customer.personal_id:
-            is_personal_id_valid = self._validate_personal_id(
+            is_personal_id_valid = self.__validate_personal_id(
                 customer.personal_id, [current_customer.personal_id])
 
             if not is_personal_id_valid:

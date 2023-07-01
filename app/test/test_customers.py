@@ -45,6 +45,9 @@ def test_get_customers_with_pagination_params(client, test_customers: List[Custo
         test_customer = CustomerBasic(**test_customers[ind + per_page].dict())
         assert customer.id == test_customer.id
         assert customer.personal_id == test_customer.personal_id
+        assert customer.href
+        if (customer.href):
+            assert str(customer.id) in customer.href
 
     assert count == len(test_customers)
     if count:

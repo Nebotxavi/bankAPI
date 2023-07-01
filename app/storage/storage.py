@@ -8,8 +8,8 @@ from .mongo_storage import MongoStorage
 from .state_storage import StateStorage
 
 from ..models.general import Test
-from ..models.products import Product, ProductList
-from ..models.customers import Customer, CustomerIn, CustomerList
+from ..models.products import Product, ProductListCollection
+from ..models.customers import Customer, CustomerIn, CustomerPagination
 
 
 class DatabaseType(Enum):
@@ -25,13 +25,13 @@ class Storage(Protocol):
     def test_database(self) -> List[Test]:
         ...
 
-    def get_products_list(self) -> ProductList:
+    def get_products_list(self) -> ProductListCollection:
         ...
 
     def get_product_by_id(self, id) -> Product:
         ...
 
-    def get_customers_list(self, per_page: int, page: int) -> CustomerList:
+    def get_customers_list(self, per_page: int, page: int) -> CustomerPagination:
         ...
 
     def get_customer_by_id(self, id) -> Customer:

@@ -1,6 +1,6 @@
 from fastapi import status
 from typing import List
-from app.models.customers import Customer, CustomerType, CustomerIn, CustomerList
+from app.models.customers import Customer, CustomerBasic, CustomerType, CustomerIn, CustomerPagination
 
 
 def test_get_customers(client, test_customers: List[Customer]):
@@ -8,9 +8,9 @@ def test_get_customers(client, test_customers: List[Customer]):
     res = client.get(f'/customers/')
 
     def validate(customer):
-        return Customer.parse_obj(customer.dict())
+        return CustomerBasic.parse_obj(customer.dict())
 
-    response = CustomerList.parse_obj(res.json())
+    response = CustomerPagination.parse_obj(res.json())
 
     customers_map = map(validate, response.data)
     customers = list(customers_map)
@@ -31,9 +31,9 @@ def test_get_customers_with_pagination_params(client, test_customers: List[Custo
     res = client.get(f'/customers/?per_page={per_page}&page={page}')
 
     def validate(customer):
-        return Customer.parse_obj(customer.dict())
+        return CustomerBasic.parse_obj(customer.dict())
 
-    response = CustomerList.parse_obj(res.json())
+    response = CustomerPagination.parse_obj(res.json())
 
     customers_map = map(validate, response.data)
     customers = list(customers_map)
@@ -42,7 +42,9 @@ def test_get_customers_with_pagination_params(client, test_customers: List[Custo
 
     assert len(customers) >= 5
     for ind, customer in enumerate(customers):
-        assert customer == test_customers[ind + per_page]
+        test_customer = CustomerBasic(**test_customers[ind + per_page].dict())
+        assert customer.id == test_customer.id
+        assert customer.personal_id == test_customer.personal_id
 
     assert count == len(test_customers)
     if count:

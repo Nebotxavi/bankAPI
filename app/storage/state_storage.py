@@ -2,17 +2,18 @@ from fastapi import HTTPException, status
 from starlette.datastructures import URL
 from typing import List
 
+from app.http.hateoas import HrefProvider
+
 from ..config import DbConfig
-from ..models.products import Product, ProductList
-from ..models.customers import Customer, CustomerIn, CustomerList, NewCustomer
+from ..models.products import Product, ProductListCollection
+from ..models.customers import Customer, CustomerIn, CustomerPagination, NewCustomer
 from ..models.general import Test, PaginatedResponse
 from ..exceptions.general_exceptions import noUniqueElement, resourceNotFound
 from ..data.customers import mock_parsed_customers
 from ..data.products import mock_parsed_products
-from ..middleware.middleware import request_object
 
 
-class Paginator():
+class Paginator:
 
     def __init__(self, dataset_list: List, page: int, per_page: int):
         self.dataset_list = dataset_list
@@ -20,12 +21,11 @@ class Paginator():
         self.per_page = per_page
         self.offset = (page - 1) * per_page
         self.count = len(dataset_list)
-        self.request = request_object.get()
 
         self.total_pages = 0
 
     def _get_url(self, params) -> URL:
-        return self.request.url.include_query_params(**params)
+        return HrefProvider.get_url_with_params(params)
 
     def _get_paginated_dataset(self) -> List:
         return self.dataset_list[self.offset: self.offset + self.per_page]
@@ -96,9 +96,9 @@ class StateStorage():
     def test_database(self) -> List[Test]:
         return self.test_list
 
-    def get_products_list(self) -> ProductList:
+    def get_products_list(self) -> ProductListCollection:
         products = self.products_list
-        return ProductList(data=products)
+        return ProductListCollection(data=products)
 
     def get_product_by_id(self, id) -> Product:
         product = next((x for x in self.products_list if x.id == id), None)
@@ -109,12 +109,12 @@ class StateStorage():
 
         return product
 
-    def get_customers_list(self, per_page: int, page: int) -> CustomerList:
+    def get_customers_list(self, per_page: int, page: int) -> CustomerPagination:
 
         dataset: List[Customer] = self.customers_list
         response = self._paginate(dataset, page, per_page)
 
-        parsed_response = CustomerList.parse_obj(response.dict())
+        parsed_response = CustomerPagination.parse_obj(response.dict())
 
         return parsed_response
 

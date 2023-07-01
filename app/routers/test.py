@@ -11,10 +11,12 @@ router = APIRouter(
     tags=['Test']
 )
 
+
 @router.get('/', response_model=List[Test])
-def test(client = Depends(StorageAccess.get_db)):
+def test(client=Depends(StorageAccess.get_db)):
     # TODO: Error handling
     tests = client.test_database()
-    list(map(lambda test: test.update({"message": f"Message for name: {test['name']}"}) , tests))
+    list(map(lambda test: test.update(
+        {"message": f"Message for name: {test['name']}"}), tests))
 
     return tests

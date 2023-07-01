@@ -1,4 +1,4 @@
-from app.models.products import Product, ProductType, ProductList
+from app.models.products import Product, ProductType, ProductListCollection
 
 
 def test_get_all_products(client):
@@ -9,7 +9,7 @@ def test_get_all_products(client):
 
     content = res.json()
 
-    ProductList.parse_obj(content)
+    ProductListCollection.parse_obj(content)
     products_map = map(validate, content['data'])
     products = list(products_map)
 

@@ -6,10 +6,14 @@ from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoin
 
 request_object: ContextVar[Request] = ContextVar('request')
 
+# TODO: change class name to a more general url provider-like name.
+
+
 class PaginationMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
         request_object.set(request)
         response = await call_next(request)
         return response
+
 
 middleware = [Middleware(PaginationMiddleware)]

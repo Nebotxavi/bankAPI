@@ -4,8 +4,8 @@
 # from typing import List, Any
 
 # from ..config import DbConfig
-# from ..models.products import Product, ProductList
-# from ..models.customers import Customer, CustomerIn, CustomerList
+# from ..models.products import Product, ProductListCollection
+# from ..models.customers import Customer, CustomerIn, CustomerPagination
 
 # # TODO: switch to SQL alchemy (engine, session_local, base...)
 
@@ -41,13 +41,13 @@
 #         self.client.execute(''' SELECT * FROM health ''')
 #         return self.client.fetchall()
 
-#     def get_products_list(self) -> ProductList:
+#     def get_products_list(self) -> ProductListCollection:
 #         ...
 
 #     def get_product_by_id(self, id) -> Product:
 #         ...
 
-#     def get_customers_list(self, per_page: int, page:int) -> CustomerList:
+#     def get_customers_list(self, per_page: int, page:int) -> CustomerPagination:
 #         ...
 
 #     def get_customer_by_id(self, id: int) -> Customer:

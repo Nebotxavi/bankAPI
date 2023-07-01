@@ -24,5 +24,5 @@ class NewProduct(Product):
     id: int = Field(default_factory=IdGenerator.get_id)
 
 
-class ProductList(ListResponse):
+class ProductListCollection(ListResponse):
     data: List[Product]

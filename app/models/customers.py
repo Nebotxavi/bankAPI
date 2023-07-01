@@ -18,20 +18,29 @@ class CustomerBase(BaseModel):
     middle_name: Optional[str] = None
     surname: str
     additional_surname: Optional[str] = None
+    # customer_type: CustomerType
+
+
+class CustomerDetail(CustomerBase):
     customer_type: CustomerType
 
 
-class Customer(CustomerBase):
+class Customer(CustomerDetail):
     id: int
 
 
-class NewCustomer(CustomerBase):
-    id: int = Field(default_factory=IdGenerator.get_id)
-
-
-class CustomerIn(CustomerBase):
+class CustomerIn(CustomerDetail):
     pass
 
 
-class CustomerList(PaginatedResponse):
-    data: List[Customer]
+class NewCustomer(CustomerIn):
+    id: int = Field(default_factory=IdGenerator.get_id)
+
+
+class CustomerBasic(CustomerBase):
+    id: int
+    href: Optional[str] = None
+
+
+class CustomerPagination(PaginatedResponse):
+    data: List[CustomerBasic]

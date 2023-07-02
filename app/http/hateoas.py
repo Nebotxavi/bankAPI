@@ -1,5 +1,5 @@
 from ..middleware.middleware import request_object
-from typing import List
+from typing import List, TypeVar, Generic
 
 
 class HrefProvider:
@@ -12,25 +12,32 @@ class HrefProvider:
     def get_url(path: str):
         request = request_object.get()
         base_url = str(request.base_url)
-
         return base_url + path
 
 
-class HateoasManager:
+T = TypeVar('T')
+
+
+class HateoasManager(Generic[T]):
     def __init__(
             self,
             dataset: List,
             path: str,
             key: str | None = None,
-            ref: str | int | None = None):
+            ref: str | int | None = None,
+            href_name: str = 'href'
+    ):
         self.path = path
         self.dataset = dataset
         self.key = key
         self.ref = ref
+        self.href_name = href_name
 
-    def __set_url(self, item):
-        id = self.ref or getattr(item, self.key) if self.key else ""
-        item.href = str(HrefProvider.get_url(f'{self.path}/{id}'))
+    def __set_url(self, item: T):
+        id = self.ref or (getattr(item, self.key) if self.key else "")
+        if hasattr(item, self.href_name):
+            setattr(item, self.href_name,
+                    HrefProvider.get_url(f'{self.path}/{id}'))
 
     def set_urls(self):
         for item in self.dataset:

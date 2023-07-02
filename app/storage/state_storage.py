@@ -1,6 +1,6 @@
 from fastapi import HTTPException, status
 from starlette.datastructures import URL
-from typing import List
+from typing import List, Dict
 
 from app.http.hateoas import HrefProvider
 
@@ -24,7 +24,7 @@ class Paginator:
 
         self.total_pages = 0
 
-    def _get_url(self, params) -> URL:
+    def _get_url(self, params: Dict) -> URL:
         return HrefProvider.get_url_with_params(params)
 
     def __get_paginated_dataset(self) -> List:

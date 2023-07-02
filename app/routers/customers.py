@@ -5,7 +5,7 @@ from pydantic import Field
 
 from app.http.hateoas import HateoasManager, HrefProvider
 
-from ..models.customers import Customer, CustomerIn, CustomerType, CustomerPagination
+from ..models.customers import Customer, CustomerBasic, CustomerIn, CustomerType, CustomerPagination
 from ..storage.storage import StorageAccess
 from ..exceptions.general_exceptions import noUniqueElement, resourceNotFound
 
@@ -31,7 +31,8 @@ def get_customers_list(
     customers: CustomerPagination = client.get_customers_list(
         int(per_page), page)
 
-    hateoas = HateoasManager(customers.data, 'customers', key='id')
+    hateoas = HateoasManager[CustomerBasic](
+        customers.data, 'customers', key='id')
     hateoas.set_urls()
 
     return customers

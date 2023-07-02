@@ -5,7 +5,7 @@ from app.models.customers import Customer, CustomerBasic, CustomerType, Customer
 
 def test_get_customers(client, test_customers: List[Customer]):
 
-    res = client.get(f'/customers/')
+    res = client.get('/customers/')
 
     def validate(customer):
         return CustomerBasic.parse_obj(customer.dict())

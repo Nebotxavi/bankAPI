@@ -55,6 +55,11 @@ def create_test_customers():
 
 
 @pytest.fixture
+def client_state():
+    return app.state.db
+
+
+@pytest.fixture
 def client():
     client = TestClient(app)
 

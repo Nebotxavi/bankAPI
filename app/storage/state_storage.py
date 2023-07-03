@@ -182,9 +182,6 @@ class StateStorage():
 
         del self.customers_list[customer_index]
 
-
-# TODO: review if this is the right way to make optionals
-
     def get_user(self, id: int | None = None, mail: EmailStr | None = None) -> User:
         if not id and not mail:
             raise ValueError(

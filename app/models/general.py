@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 from pydantic.generics import GenericModel
-from typing import TypeVar, Generic, Optional, List, TypedDict, Any
+from typing import TypeVar, Generic, List, TypedDict, Any
 
 # TODO: to be removed
 
@@ -18,7 +18,7 @@ class ListResponse(GenericModel, Generic[M]):
 
 
 class PaginatedResponse(ListResponse):
-    count: Optional[int] = None
-    total_pages: Optional[int] = None
-    next_page: Optional[str] = None
-    previous_page: Optional[str] = None
+    count: int | None = None
+    total_pages: int | None = None
+    next_page: str | None = None
+    previous_page: str | None = None

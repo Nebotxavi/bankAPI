@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, status, HTTPException, Response, Query, Path
-from typing import List, Optional, Literal
+from typing import Literal
 from typing_extensions import Annotated
 from pydantic import Field
 from app.auth.oauth2 import get_current_user

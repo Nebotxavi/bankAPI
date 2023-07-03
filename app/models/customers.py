@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import Optional, List
+from typing import List
 from enum import Enum
 
 from app.utils.utils import IdGenerator
@@ -15,9 +15,9 @@ class CustomerType(Enum):
 class CustomerBase(BaseModel):
     personal_id: str
     family_name: str
-    middle_name: Optional[str] = None
+    middle_name: str | None = None
     surname: str
-    additional_surname: Optional[str] = None
+    additional_surname: str | None = None
     # customer_type: CustomerType
 
 
@@ -39,7 +39,7 @@ class NewCustomer(CustomerIn):
 
 class CustomerBasic(CustomerBase):
     id: int
-    href: Optional[str] = None
+    href: str | None = None
 
 
 class CustomerPagination(PaginatedResponse):

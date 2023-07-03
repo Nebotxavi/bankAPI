@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from typing import List
+from app.auth.oauth2 import get_current_user
 
 from app.exceptions.general_exceptions import resourceNotFound
 
@@ -13,14 +14,16 @@ router = APIRouter(
 
 
 @router.get('/', response_model=ProductListCollection)
-def get_products_list(client=Depends(StorageAccess.get_db)):
+def get_products_list(client=Depends(StorageAccess.get_db),
+                      current_user: int = Depends(get_current_user),):
     products_list = client.get_products_list()
 
     return products_list
 
 
 @router.get('/{id}/', response_model=Product)
-def get_product(id: int, client=Depends(StorageAccess.get_db)):
+def get_product(id: int, client=Depends(StorageAccess.get_db),
+                current_user: int = Depends(get_current_user),):
     try:
         product = client.get_product_by_id(id)
 

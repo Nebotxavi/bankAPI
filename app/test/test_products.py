@@ -1,8 +1,8 @@
 from app.models.products import Product, ProductType, ProductListCollection
 
 
-def test_get_all_products(client):
-    res = client.get('/products/')
+def test_get_all_products(authorized_client):
+    res = authorized_client.get('/products/')
 
     def validate(product):
         return Product.parse_obj(product)
@@ -19,8 +19,8 @@ def test_get_all_products(client):
     assert res.status_code == 200
 
 
-def test_get_product(client, products):
-    res = client.get(f'/products/{products[0].id}')
+def test_get_product(authorized_client, products):
+    res = authorized_client.get(f'/products/{products[0].id}')
 
     product = Product.parse_obj(res.json())
 

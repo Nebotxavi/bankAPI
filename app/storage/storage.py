@@ -1,6 +1,9 @@
 from enum import Enum, auto
 from typing import Protocol, List
+from pydantic import EmailStr
 from starlette.requests import Request
+
+from app.models.users import User
 
 from ..config import DbConfig
 from .mongo_storage import MongoStorage
@@ -41,6 +44,12 @@ class Storage(Protocol):
         ...
 
     def update_customer(self, id, customer) -> Customer:
+        ...
+
+    def delete_customer(self, id: str) -> None:
+        ...
+
+    def get_user(self, id: int | None, mail: EmailStr | None) -> User:
         ...
 
 

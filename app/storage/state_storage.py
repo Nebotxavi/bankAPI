@@ -80,7 +80,6 @@ class StateStorage():
         self.users_list: List[User] = [User.parse_obj(
             user.dict()) for user in mock_parsed_users]
 
-        print('------------', self.users_list)
         self.products_list: List[Product] = [Product.parse_obj(
             product.dict()) for product in mock_parsed_products]
 

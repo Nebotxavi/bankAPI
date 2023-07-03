@@ -72,8 +72,8 @@ def test_get_customers_with_wrong_pagination_params(authorized_client):
     assert res.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
-def test_get_customer(client, test_customers: List[Customer]):
-    res = client.get(f'/customers/{test_customers[0].id}')
+def test_get_customer(authorized_client, test_customers: List[Customer]):
+    res = authorized_client.get(f'/customers/{test_customers[0].id}')
     customer = Customer.parse_obj(res.json())
 
     assert res.status_code == status.HTTP_200_OK
@@ -86,13 +86,13 @@ def test_get_customer(client, test_customers: List[Customer]):
     assert customer.customer_type == test_customers[0].customer_type
 
 
-def test_get_customer_not_exist(client):
-    res = client.get('/customers/88888888')
+def test_get_customer_not_exist(authorized_client):
+    res = authorized_client.get('/customers/88888888')
 
     assert res.status_code == status.HTTP_404_NOT_FOUND
 
 
-def test_create_customer(client):
+def test_create_customer(authorized_client):
     new_customer = {
         "personal_id": "2233869KC",
         "family_name": "Antionet",
@@ -101,7 +101,7 @@ def test_create_customer(client):
         "customer_type": "Analyst"
     }
 
-    res = client.post('/customers/', json=new_customer)
+    res = authorized_client.post('/customers/', json=new_customer)
 
     received_customer = Customer.parse_obj(res.json())
 
@@ -113,7 +113,7 @@ def test_create_customer(client):
         new_customer['customer_type'])
 
 
-def test_new_customer_ID_is_higher_than_previous(client, test_customers: List[Customer]):
+def test_new_customer_ID_is_higher_than_previous(authorized_client, test_customers: List[Customer]):
     new_customer = {
         "personal_id": "2233869KD",
         "family_name": "Antionet",
@@ -122,7 +122,7 @@ def test_new_customer_ID_is_higher_than_previous(client, test_customers: List[Cu
         "customer_type": "Analyst"
     }
 
-    res = client.post('/customers/', json=new_customer)
+    res = authorized_client.post('/customers/', json=new_customer)
 
     received_customer = Customer.parse_obj(res.json())
 
@@ -130,19 +130,19 @@ def test_new_customer_ID_is_higher_than_previous(client, test_customers: List[Cu
     assert int(received_customer.id) > int(test_customers[-2].id)
 
 
-def test_create_wrong_customer(client):
+def test_create_wrong_customer(authorized_client):
     new_customer = {
         "personal_id": "18438695C",
         "family_name": "Antionet",
         "surname": "Hazel",
     }
 
-    res = client.post('/customers/', json=new_customer)
+    res = authorized_client.post('/customers/', json=new_customer)
 
     assert res.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
-def test_create_customer_with_personal_id_already_used(client, test_customers: List[Customer]):
+def test_create_customer_with_personal_id_already_used(authorized_client, test_customers: List[Customer]):
     new_customer = {
         "personal_id": test_customers[0].personal_id,
         "family_name": "Antionet",
@@ -151,12 +151,12 @@ def test_create_customer_with_personal_id_already_used(client, test_customers: L
         "customer_type": "Analyst"
     }
 
-    res = client.post('/customers/', json=new_customer)
+    res = authorized_client.post('/customers/', json=new_customer)
 
     assert res.status_code == status.HTTP_409_CONFLICT
 
 
-def test_update_customer(client, test_customers: List[Customer]):
+def test_update_customer(authorized_client, test_customers: List[Customer]):
     current_customer = test_customers[0]
 
     updated_customer = {
@@ -168,7 +168,7 @@ def test_update_customer(client, test_customers: List[Customer]):
         "customer_type": current_customer.customer_type.value
     }
 
-    res = client.put(
+    res = authorized_client.put(
         f'/customers/{test_customers[0].id}', json=updated_customer)
     received_customer = Customer.parse_obj(res.json())
 
@@ -176,7 +176,7 @@ def test_update_customer(client, test_customers: List[Customer]):
     assert received_customer.family_name == updated_customer['family_name']
 
 
-def test_updated_with_wrong_id(client, test_customers: List[Customer]):
+def test_updated_with_wrong_id(authorized_client, test_customers: List[Customer]):
     current_customer = test_customers[0]
 
     updated_customer = {
@@ -188,13 +188,13 @@ def test_updated_with_wrong_id(client, test_customers: List[Customer]):
         "customer_type": current_customer.customer_type.value
     }
 
-    res = client.put(
+    res = authorized_client.put(
         f'/customers/8888888', json=updated_customer)
 
     assert res.status_code == status.HTTP_404_NOT_FOUND
 
 
-def test_update_with_wrong_data(client, test_customers: List[Customer]):
+def test_update_with_wrong_data(authorized_client, test_customers: List[Customer]):
     current_customer = test_customers[0]
 
     updated_customer = {
@@ -204,13 +204,13 @@ def test_update_with_wrong_data(client, test_customers: List[Customer]):
         "customer_type": current_customer.customer_type.value
     }
 
-    res = client.put(
+    res = authorized_client.put(
         f'/customers/{test_customers[0].id}', json=updated_customer)
 
     assert res.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
-def test_update_with_used_personal_id(client, test_customers: List[Customer]):
+def test_update_with_used_personal_id(authorized_client, test_customers: List[Customer]):
     current_customer = test_customers[0]
     other_customer = test_customers[1]
 
@@ -223,13 +223,13 @@ def test_update_with_used_personal_id(client, test_customers: List[Customer]):
         "customer_type": current_customer.customer_type.value
     }
 
-    res = client.put(
+    res = authorized_client.put(
         f'/customers/{test_customers[0].id}', json=updated_customer)
 
     assert res.status_code == status.HTTP_409_CONFLICT
 
 
-def test_update_with_blank_optional_data(client, test_customers: List[Customer]):
+def test_update_with_blank_optional_data(authorized_client, test_customers: List[Customer]):
     current_customer = test_customers[0]
 
     updated_customer = {
@@ -239,7 +239,7 @@ def test_update_with_blank_optional_data(client, test_customers: List[Customer])
         "customer_type": current_customer.customer_type.value
     }
 
-    res = client.put(
+    res = authorized_client.put(
         f'/customers/{test_customers[0].id}', json=updated_customer)
     received_customer = Customer.parse_obj(res.json())
 
@@ -248,13 +248,13 @@ def test_update_with_blank_optional_data(client, test_customers: List[Customer])
     assert received_customer.additional_surname == None
 
 
-def test_delete_customer(client, test_customers: List[Customer]):
-    res = client.delete(f'/customers/{test_customers[0].id}')
+def test_delete_customer(authorized_client, test_customers: List[Customer]):
+    res = authorized_client.delete(f'/customers/{test_customers[0].id}')
 
     assert res.status_code == status.HTTP_204_NO_CONTENT
 
 
-def test_delete_wrong_customer(client, test_customers: List[Customer]):
-    res = client.delete('customers/888888888')
+def test_delete_wrong_customer(authorized_client, test_customers: List[Customer]):
+    res = authorized_client.delete('customers/888888888')
 
     assert res.status_code == status.HTTP_404_NOT_FOUND

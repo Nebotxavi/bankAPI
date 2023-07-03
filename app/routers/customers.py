@@ -15,8 +15,6 @@ router = APIRouter(
     tags=['Customers']
 )
 
-# TODO: Add sort and implement other filters (just add pagination...)
-
 
 @router.get("/", response_model=CustomerPagination)
 def get_customers_list(
@@ -25,9 +23,9 @@ def get_customers_list(
     per_page: Literal['5', '10', '25'] = '10',
     page: Annotated[int, Query(gt=0)] = 1
 ):
-    # SORT
+    # TODO: SORT
 
-    # SEARCH
+    # TODO: SEARCH
 
     customers: CustomerPagination = client.get_customers_list(
         int(per_page), page)
@@ -40,7 +38,7 @@ def get_customers_list(
 
 
 @router.get("/{id}", response_model=Customer)
-def get_customer(id: int, client=Depends(StorageAccess.get_db)):
+def get_customer(id: int, client=Depends(StorageAccess.get_db), current_user: int = Depends(get_current_user),):
     try:
         customer: Customer = client.get_customer_by_id(id)
         return customer
@@ -51,7 +49,7 @@ def get_customer(id: int, client=Depends(StorageAccess.get_db)):
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=Customer)
-def create_customer(customer: CustomerIn, client=Depends(StorageAccess.get_db)):
+def create_customer(customer: CustomerIn, client=Depends(StorageAccess.get_db), current_user: int = Depends(get_current_user)):
     try:
         new_customer: Customer = client.create_customer(customer)
 
@@ -61,11 +59,12 @@ def create_customer(customer: CustomerIn, client=Depends(StorageAccess.get_db)):
         raise HTTPException(status_code=status.HTTP_409_CONFLICT,
                             detail=f"Could not create the new customer. The personal ID {customer.personal_id} is already used.")
 
-# TODO: auth issue: diference between banker (can edit all) and user (can edit only part of himself)
-
 
 @router.put("/{id}", response_model=Customer)
-def update_customer(id: int, customer: CustomerIn, client=Depends(StorageAccess.get_db)):
+def update_customer(
+        id: int,
+        customer: CustomerIn, client=Depends(StorageAccess.get_db),
+        current_user: int = Depends(get_current_user),):
     try:
         updated_customer: Customer = client.update_customer(id, customer)
 
@@ -76,11 +75,11 @@ def update_customer(id: int, customer: CustomerIn, client=Depends(StorageAccess.
                             detail=f"User with id: {id} was not found")
     except noUniqueElement:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT,
-                            detail=f"Could not create the new customer. The personal ID {customer.personal_id} is already used.")
+                            detail=f"Could not update the customer. The personal ID {customer.personal_id} is already used.")
 
 
 @router.delete("/{id}", response_model=Customer)
-def delete_customer(id: int, client=Depends(StorageAccess.get_db)):
+def delete_customer(id: int, client=Depends(StorageAccess.get_db), current_user: int = Depends(get_current_user),):
     try:
         client.delete_customer(id)
 

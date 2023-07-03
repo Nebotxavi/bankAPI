@@ -1,11 +1,14 @@
 from fastapi.testclient import TestClient
 from typing import List
 import pytest
+from app.auth.oauth2 import create_access_token
+from app.models.users import User
 
 
 from app.storage.storage import StorageFactory, DatabaseType
 from app.models.customers import CustomerType, CustomerIn, Customer
 from app.models.products import Product
+from app.data.users import mock_users_list
 from app.config import dbConfig
 from app.main import app
 
@@ -54,6 +57,27 @@ def create_test_customers():
 @pytest.fixture
 def client():
     client = TestClient(app)
+
+    return client
+
+
+@pytest.fixture
+def test_user() -> User:
+    client_state = app.state.db
+    return client_state.get_user(mail=mock_users_list[0]['mail'])
+
+
+@pytest.fixture
+def token(test_user):
+    return create_access_token({"user_id": test_user.id})
+
+
+@pytest.fixture
+def authorized_client(client, token):
+    client.headers = {
+        **client.headers,
+        'Authorization': f"Bearer {token}"
+    }
 
     return client
 

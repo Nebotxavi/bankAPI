@@ -1,16 +1,20 @@
 from fastapi import HTTPException, status
+from pydantic import EmailStr
 from starlette.datastructures import URL
 from typing import List, Dict
 
 from app.http.hateoas import HrefProvider
+from app.models.users import User
 
 from ..config import DbConfig
 from ..models.products import Product, ProductListCollection
 from ..models.customers import Customer, CustomerIn, CustomerPagination, NewCustomer
+from ..models.users import User
 from ..models.general import Test, PaginatedResponse
 from ..exceptions.general_exceptions import noUniqueElement, resourceNotFound
 from ..data.customers import mock_parsed_customers
 from ..data.products import mock_parsed_products
+from ..data.users import mock_parsed_users
 
 
 class Paginator:
@@ -73,6 +77,10 @@ class StateStorage():
             Test(name='SuperTest', test=99)
         ]
 
+        self.users_list: List[User] = [User.parse_obj(
+            user.dict()) for user in mock_parsed_users]
+
+        print('------------', self.users_list)
         self.products_list: List[Product] = [Product.parse_obj(
             product.dict()) for product in mock_parsed_products]
 
@@ -104,8 +112,7 @@ class StateStorage():
         product = next((x for x in self.products_list if x.id == id), None)
 
         if not product:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                                detail=f"Product with id: {id} was not found")
+            raise resourceNotFound
 
         return product
 
@@ -175,3 +182,23 @@ class StateStorage():
             raise resourceNotFound
 
         del self.customers_list[customer_index]
+
+
+# TODO: review if this is the right way to make optionals
+
+    def get_user(self, id: int | None = None, mail: EmailStr | None = None) -> User:
+        if not id and not mail:
+            raise ValueError(
+                "Either 'id' or 'mail' parameter must be provided.")
+        if id and mail:
+            raise ValueError(
+                "Only one of 'id' or 'mail' parameters should be provided.")
+
+        user = next((user for user in self.users_list if user.id ==
+                    id or user.mail == mail), None)
+
+        if not user:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                                detail=f"User {id or mail} was not found")
+
+        return user

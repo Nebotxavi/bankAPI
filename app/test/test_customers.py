@@ -3,9 +3,9 @@ from typing import List
 from app.models.customers import Customer, CustomerBasic, CustomerType, CustomerIn, CustomerPagination
 
 
-def test_get_customers(client, test_customers: List[Customer]):
+def test_get_customers(authorized_client, test_customers: List[Customer]):
 
-    res = client.get('/customers/')
+    res = authorized_client.get('/customers/')
 
     def validate(customer):
         return CustomerBasic.parse_obj(customer.dict())
@@ -24,11 +24,11 @@ def test_get_customers(client, test_customers: List[Customer]):
     assert res.status_code == 200
 
 
-def test_get_customers_with_pagination_params(client, test_customers: List[Customer]):
+def test_get_customers_with_pagination_params(authorized_client, test_customers: List[Customer]):
     per_page = 5
     page = 2
 
-    res = client.get(f'/customers/?per_page={per_page}&page={page}')
+    res = authorized_client.get(f'/customers/?per_page={per_page}&page={page}')
 
     def validate(customer):
         return CustomerBasic.parse_obj(customer.dict())
@@ -56,9 +56,9 @@ def test_get_customers_with_pagination_params(client, test_customers: List[Custo
     assert res.status_code == status.HTTP_200_OK
 
 
-def test_get_customers_with_pagination_empty_page(client):
+def test_get_customers_with_pagination_empty_page(authorized_client):
     page = 8888888
-    res = client.get(f'/customers/?page={page}')
+    res = authorized_client.get(f'/customers/?page={page}')
 
     content = res.json()
 
@@ -66,8 +66,8 @@ def test_get_customers_with_pagination_empty_page(client):
     assert len(content['data']) == 0
 
 
-def test_get_customers_with_wrong_pagination_params(client):
-    res = client.get(f'/customers/?per_page=7&page=2')
+def test_get_customers_with_wrong_pagination_params(authorized_client):
+    res = authorized_client.get(f'/customers/?per_page=7&page=2')
 
     assert res.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 

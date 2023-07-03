@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .config import dbConfig
 from .storage.storage import DatabaseType, StorageFactory
-from .routers import test, products, customers
+from .routers import test, products, customers, auth
 from .middleware.middleware import middleware
 
 app = FastAPI(middleware=middleware)
@@ -21,13 +21,16 @@ app.add_middleware(
 app.include_router(test.router)
 app.include_router(products.router)
 app.include_router(customers.router)
+app.include_router(auth.router)
+
 
 @app.on_event('startup')
 def db_start():
     # TODO: error handling
-    app.state.db = StorageFactory.get_storage(DatabaseType[dbConfig.db_type], dbConfig)
+    app.state.db = StorageFactory.get_storage(
+        DatabaseType[dbConfig.db_type], dbConfig)
+
 
 @app.get("/health")
 async def root():
     return {"status": "OK"}
-

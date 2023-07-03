@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, status, HTTPException, Response, Query, 
 from typing import List, Optional, Literal
 from typing_extensions import Annotated
 from pydantic import Field
+from app.auth.oauth2 import get_current_user
 
 from app.http.hateoas import HateoasManager, HrefProvider
 
@@ -20,10 +21,10 @@ router = APIRouter(
 @router.get("/", response_model=CustomerPagination)
 def get_customers_list(
     client=Depends(StorageAccess.get_db),
+    current_user: int = Depends(get_current_user),
     per_page: Literal['5', '10', '25'] = '10',
     page: Annotated[int, Query(gt=0)] = 1
 ):
-
     # SORT
 
     # SEARCH

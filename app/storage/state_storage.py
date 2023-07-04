@@ -194,7 +194,6 @@ class StateStorage():
                     id or user.mail == mail), None)
 
         if not user:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                                detail=f"User {id or mail} was not found")
+            raise resourceNotFound
 
         return user

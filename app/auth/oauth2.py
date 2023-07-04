@@ -3,6 +3,7 @@ from fastapi import HTTPException, status, Depends
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from datetime import datetime, timedelta
+from app.exceptions.general_exceptions import resourceNotFound
 
 from app.models.auth import TokenData
 from app.storage.storage import StorageAccess
@@ -46,7 +47,10 @@ def get_current_user(token: str = Depends(oauth2_scheme), client=Depends(Storage
 
     verified_token: TokenData = _verify_access_token(
         token, credentials_exception)
+    try:
+        user = client.get_user(id=int(verified_token.id))
 
-    user = client.get_user(id=int(verified_token.id))
+    except resourceNotFound:
+        raise credentials_exception
 
     return user

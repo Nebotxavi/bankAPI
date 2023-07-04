@@ -5,8 +5,6 @@ from app.config import settings
 from app.models.users import User
 from jose.jwt import decode
 
-from app.storage.storage import StorageAccess
-
 
 def test_create_access_token(test_user: User):
 
@@ -56,5 +54,4 @@ def test_get_current_user_with_wrong_user(test_user: User, client_state):
     with pytest.raises(HTTPException) as exc_info:
         get_current_user(token, client_state)
 
-    assert exc_info.value.status_code == status.HTTP_404_NOT_FOUND
-    assert str(test_user.id + 1) in exc_info.value.detail
+    assert exc_info.value.status_code == status.HTTP_401_UNAUTHORIZED

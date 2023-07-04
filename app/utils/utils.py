@@ -18,5 +18,5 @@ class Crypt:
         return pwd_context.hash(password)
 
     @staticmethod
-    def verify(plain_password, hashed_password):
+    def verify(plain_password, hashed_password) -> bool:
         return pwd_context.verify(plain_password, hashed_password)

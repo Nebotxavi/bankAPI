@@ -38,9 +38,8 @@ def test_verify_access_token_with_modified_token(token: str):
     assert exc_info.value.headers == {"WWW-Authenticate": "Bearer"}
 
 
-def test_get_current_user(test_user: User, token: str, client_state):
-    # TODO: review here and in conftest the variable name client_state
-    user = get_current_user(token, client_state)
+def test_get_current_user(test_user: User, token: str, storage):
+    user = get_current_user(token, storage)
 
     assert user
     assert user.password
@@ -48,10 +47,10 @@ def test_get_current_user(test_user: User, token: str, client_state):
     assert user.id == test_user.id
 
 
-def test_get_current_user_with_wrong_user(test_user: User, client_state):
+def test_get_current_user_with_wrong_user(test_user: User, storage):
     token = create_access_token(data={'user_id': test_user.id + 1})
 
     with pytest.raises(HTTPException) as exc_info:
-        get_current_user(token, client_state)
+        get_current_user(token, storage)
 
     assert exc_info.value.status_code == status.HTTP_401_UNAUTHORIZED

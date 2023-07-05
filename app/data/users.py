@@ -3,7 +3,7 @@ from typing import List
 
 from app.utils.utils import Crypt
 
-from ..models.users import NewUser
+from ..models.users import User
 
 mock_users_list = [
     {
@@ -18,9 +18,9 @@ mock_users_list = [
 
 
 def parse_users(user_list):
-    parsed_users: List[NewUser] = []
+    parsed_users: List[User] = []
     for user in user_list:
-        parsed_users.append(NewUser.parse_obj(user))
+        parsed_users.append(User.parse_obj(user))
         time.sleep(0.01)
 
     return parsed_users

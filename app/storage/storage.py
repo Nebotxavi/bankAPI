@@ -40,7 +40,7 @@ class Storage(Protocol):
     def get_customer_by_id(self, id) -> Customer:
         ...
 
-    def create_customer(self, customer: CustomerIn) -> Customer:
+    def create_customer(self, customer: Customer) -> Customer:
         ...
 
     def update_customer(self, id, customer) -> Customer:

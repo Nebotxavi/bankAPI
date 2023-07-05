@@ -1,5 +1,6 @@
+from fastapi import Query
 from pydantic import BaseModel, Field
-from typing import List
+from typing import Annotated, List
 from enum import Enum
 
 from app.utils.utils import IdGenerator
@@ -13,11 +14,11 @@ class CustomerType(Enum):
 
 
 class CustomerBase(BaseModel):
-    personal_id: str
-    family_name: str
-    middle_name: str | None = None
-    surname: str
-    additional_surname: str | None = None
+    personal_id: Annotated[str, Query(max_length=50)]
+    family_name: Annotated[str, Query(max_length=50)]
+    middle_name: Annotated[str | None, Query(max_length=50)] = None
+    surname: Annotated[str, Query(max_length=50)]
+    additional_surname: Annotated[str | None, Query(max_length=50)] = None
 
 
 class CustomerDetail(CustomerBase):

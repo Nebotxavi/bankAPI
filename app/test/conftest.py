@@ -17,7 +17,7 @@ app.state.db = StorageFactory.get_storage(DatabaseType.STATE, dbConfig)
 
 @app.on_event("startup")
 def create_test_customers():
-    client_state = app.state.db
+    storage = app.state.db
     customers = []
 
     test_customers_list = [
@@ -48,14 +48,14 @@ def create_test_customers():
     for test_customer in test_customers_list:
         customer = CustomerIn.parse_obj(test_customer)
 
-        new_customer = client_state.create_customer(customer)
+        new_customer = storage.create_customer(customer)
         customers.append(new_customer)
 
     return customers
 
 
 @pytest.fixture
-def client_state():
+def storage():
     return app.state.db
 
 
@@ -68,8 +68,8 @@ def client():
 
 @pytest.fixture
 def test_user() -> User:
-    client_state = app.state.db
-    return client_state.get_user(mail=mock_users_list[0]['mail'])
+    storage = app.state.db
+    return storage.get_user(mail=mock_users_list[0]['mail'])
 
 
 @pytest.fixture
@@ -89,13 +89,13 @@ def authorized_client(client, token):
 
 @pytest.fixture
 def products() -> List[Product]:
-    client_state = app.state.db
+    storage = app.state.db
 
-    return client_state.products_list
+    return storage.products_list
 
 
 @pytest.fixture
 def test_customers() -> List[Customer]:
-    client_state = app.state.db
+    storage = app.state.db
 
-    return client_state.customers_list
+    return storage.customers_list

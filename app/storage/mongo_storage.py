@@ -31,7 +31,7 @@ class MongoStorage:
     def get_customer_by_id(self, id: int) -> Customer:
         ...
 
-    def create_customer(self, customer: CustomerIn) -> Customer:
+    def create_customer(self, customer: Customer) -> Customer:
         ...
 
     def update_customer(self, id, customer: CustomerIn) -> Customer:

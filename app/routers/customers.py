@@ -51,7 +51,8 @@ def get_customer(id: int, client=Depends(StorageAccess.get_db), current_user: in
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=Customer)
 def create_customer(customer: CustomerIn, client=Depends(StorageAccess.get_db), current_user: int = Depends(get_current_user)):
     try:
-        new_customer: Customer = client.create_customer(customer)
+        validated_customer = Customer.parse_obj(customer.dict())
+        new_customer: Customer = client.create_customer(validated_customer)
 
         return new_customer
 

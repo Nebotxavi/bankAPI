@@ -2,7 +2,7 @@ import time
 import uuid
 from typing import List
 
-from ..models.customers import CustomerType, NewCustomer
+from ..models.customers import CustomerType, Customer
 
 mock_customers_list = [
     {
@@ -137,9 +137,9 @@ mock_customers_list = [
 
 
 def parse_customers(customers_list):
-    parsed_customers: List[NewCustomer] = []
+    parsed_customers: List[Customer] = []
     for customer in customers_list:
-        parsed_customers.append(NewCustomer.parse_obj(customer))
+        parsed_customers.append(Customer.parse_obj(customer))
         time.sleep(0.01)
 
     return parsed_customers

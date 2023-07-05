@@ -8,7 +8,7 @@ from app.models.users import User
 
 from ..config import DbConfig
 from ..models.products import Product, ProductListCollection
-from ..models.customers import Customer, CustomerIn, CustomerPagination, NewCustomer
+from ..models.customers import Customer, CustomerIn, CustomerPagination, Customer
 from ..models.users import User
 from ..models.general import Test, PaginatedResponse
 from ..exceptions.general_exceptions import noUniqueElement, resourceNotFound
@@ -132,19 +132,19 @@ class StateStorage():
 
         return customer
 
-    def create_customer(self, customer: CustomerIn) -> Customer:
+    def create_customer(self, customer: Customer) -> Customer:
         is_personal_id_valid = self.__validate_personal_id(
             customer.personal_id)
 
         if not is_personal_id_valid:
             raise noUniqueElement
 
-        customer_with_id = NewCustomer.parse_obj(customer.dict())
-        new_customer = Customer.parse_obj(customer_with_id.dict())
+        # customer_with_id = Customer.parse_obj(customer.dict())
+        # new_customer = Customer.parse_obj(customer_with_id.dict())
 
-        self.customers_list.append(new_customer)
+        self.customers_list.append(customer)
 
-        return new_customer
+        return customer
 
     def update_customer(self, id: str, customer: CustomerIn) -> Customer:
         customer_index = next((ind for ind, customer in enumerate(

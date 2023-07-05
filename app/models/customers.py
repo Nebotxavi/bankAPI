@@ -18,7 +18,6 @@ class CustomerBase(BaseModel):
     middle_name: str | None = None
     surname: str
     additional_surname: str | None = None
-    # customer_type: CustomerType
 
 
 class CustomerDetail(CustomerBase):
@@ -26,15 +25,11 @@ class CustomerDetail(CustomerBase):
 
 
 class Customer(CustomerDetail):
-    id: int
+    id: int = Field(default_factory=IdGenerator.get_id)
 
 
 class CustomerIn(CustomerDetail):
     pass
-
-
-class NewCustomer(CustomerIn):
-    id: int = Field(default_factory=IdGenerator.get_id)
 
 
 class CustomerBasic(CustomerBase):

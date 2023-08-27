@@ -1,5 +1,5 @@
 from ..middleware.middleware import request_object
-from typing import List, TypeVar, Generic
+from typing import TypeVar, Generic
 
 
 class HrefProvider:
@@ -21,7 +21,7 @@ T = TypeVar('T')
 class HateoasManager(Generic[T]):
     def __init__(
             self,
-            dataset: List,
+            dataset: list,
             path: str,
             key: str | None = None,
             ref: str | int | None = None,

@@ -1,14 +1,14 @@
-from fastapi import APIRouter, Depends, status, HTTPException, Response, Query, Path
+from fastapi import APIRouter, Depends, status, HTTPException, Query
+from fastapi.responses import JSONResponse
 from typing import Literal
 from typing_extensions import Annotated
-from pydantic import Field
 from app.auth.oauth2 import get_current_user
 
-from app.http.hateoas import HateoasManager, HrefProvider
+from app.http.hateoas import HateoasManager
 
-from ..models.customers import Customer, CustomerBasic, CustomerIn, CustomerType, CustomerPagination
-from ..storage.storage import StorageAccess
-from ..exceptions.general_exceptions import noUniqueElement, resourceNotFound
+from ..models.customers import Customer, CustomerBasic, CustomerIn, CustomerPagination
+from ..storage.storage import Storage, StorageAccess
+from ..exceptions.general_exceptions import ImmutableFieldError, NoUniqueElement, ResourceNotFound
 
 router = APIRouter(
     prefix="/customers",
@@ -38,26 +38,25 @@ def get_customers_list(
 
 
 @router.get("/{id}", response_model=Customer)
-def get_customer(id: int, client=Depends(StorageAccess.get_db), current_user: int = Depends(get_current_user),):
+def get_customer(id: int, client: Storage = Depends(StorageAccess.get_db), current_user: int = Depends(get_current_user),):
     try:
         customer: Customer = client.get_customer_by_id(id)
         return customer
 
-    except resourceNotFound:
+    except ResourceNotFound:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"User with id: {id} was not found")
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=Customer)
-def create_customer(customer: CustomerIn, client=Depends(StorageAccess.get_db), current_user: int = Depends(get_current_user)):
+def create_customer(customer: CustomerIn, client: Storage = Depends(StorageAccess.get_db), current_user: int = Depends(get_current_user)):
     try:
-        # this provides ID to the incoming customer
-        parsed_customer = Customer.parse_obj(customer.dict())
+        parsed_customer = Customer.model_validate(customer.model_dump())
         new_customer: Customer = client.create_customer(parsed_customer)
 
         return new_customer
 
-    except noUniqueElement:
+    except NoUniqueElement:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT,
                             detail=f"Could not create the new customer. The personal ID {customer.personal_id} is already used.")
 
@@ -65,30 +64,33 @@ def create_customer(customer: CustomerIn, client=Depends(StorageAccess.get_db), 
 @router.put("/{id}", response_model=Customer)
 def update_customer(
         id: int,
-        customer: CustomerIn,
-        client=Depends(StorageAccess.get_db),
+        customer: Customer,
+        client: Storage = Depends(StorageAccess.get_db),
         current_user: int = Depends(get_current_user),):
     try:
         updated_customer: Customer = client.update_customer(id, customer)
 
         return updated_customer
 
-    except resourceNotFound:
+    except ResourceNotFound:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"User with id: {id} was not found")
-    except noUniqueElement:
+    except NoUniqueElement:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT,
                             detail=f"Could not update the customer. The personal ID {customer.personal_id} is already used.")
 
+    except ImmutableFieldError as error:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT,
+                            detail=str(error))
 
-@router.delete("/{id}", response_model=Customer)
-def delete_customer(id: int, client=Depends(StorageAccess.get_db), current_user: int = Depends(get_current_user),):
+@router.delete("/{id}")
+def delete_customer(id: int, client: Storage = Depends(StorageAccess.get_db), current_user: int = Depends(get_current_user)):
     try:
         client.delete_customer(id)
 
-        return Response(status_code=status.HTTP_204_NO_CONTENT,
-                        content=f'User with id: {id} has been removed.')
+        return JSONResponse(status_code=status.HTTP_200_OK,
+                            content={"message": f'User with id: {id} has been removed.'})
 
-    except resourceNotFound:
+    except ResourceNotFound:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"User with id: {id} was not found.")

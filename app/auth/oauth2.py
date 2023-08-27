@@ -3,7 +3,7 @@ from fastapi import HTTPException, status, Depends
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from datetime import datetime, timedelta
-from app.exceptions.general_exceptions import resourceNotFound
+from app.exceptions.general_exceptions import ResourceNotFound
 
 from app.models.auth import TokenData
 from app.storage.storage import StorageAccess
@@ -33,7 +33,7 @@ def _verify_access_token(token: str, credentials_exception: HTTPException) -> To
 
         if id is None:
             raise credentials_exception
-        token_data = TokenData(id=id)
+        token_data = TokenData(id=int(id))
     except JWTError:
         raise credentials_exception
 
@@ -49,7 +49,7 @@ def get_current_user(token: str = Depends(oauth2_scheme), client=Depends(Storage
     try:
         user = client.get_user(id=int(verified_token.id))
 
-    except resourceNotFound:
+    except ResourceNotFound:
         raise credentials_exception
 
     return user

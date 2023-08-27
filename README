@@ -9,14 +9,8 @@ pip3 install -r requirements. txt
 
 .env structure:
 
-postgresql_hostname=''
-postgresql_port=''
-postgresql_password=''
-postgresql_name=''
-postgresql_username=''
-
-mongo_password=''
-mongo_username=''
+password=''
+username=''
 
 db_name=''
 db_type=''

@@ -1,7 +1,6 @@
 import time
-from typing import List
 
-from app.models.products import NewProduct, ProductType
+from app.models.products import ProductIn, ProductType
 
 
 mock_products_list = [
@@ -11,9 +10,9 @@ mock_products_list = [
 
 
 def parse_products(products_list):
-    parsed_products: List[NewProduct] = []
+    parsed_products: list[ProductIn] = []
     for product in products_list:
-        parsed_products.append(NewProduct.parse_obj(product))
+        parsed_products.append(ProductIn.model_validate(product))
         time.sleep(0.01)
 
     return parsed_products

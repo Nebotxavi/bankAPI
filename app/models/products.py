@@ -1,6 +1,5 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, computed_field
 from enum import Enum
-from typing import List
 
 from app.utils.utils import IdGenerator
 
@@ -20,9 +19,11 @@ class Product(ProductBase):
     id: int
 
 
-class NewProduct(Product):
-    id: int = Field(default_factory=IdGenerator.get_id)
-
+class ProductIn(ProductBase):
+    @computed_field
+    @property
+    def id(self) -> int:
+        return IdGenerator.get_id()
 
 class ProductListCollection(ListResponse):
-    data: List[Product]
+    data: list[Product]

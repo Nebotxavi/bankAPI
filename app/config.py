@@ -1,30 +1,34 @@
-from pydantic import BaseSettings
+from pydantic import BaseModel
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
-
-class DbConfig(BaseSettings):
-    postgresql_hostname: str = ''
-    postgresql_port: str = ''
-    postgresql_password: str = ''
-    postgresql_username: str = ''
-
-    mongo_password: str = ''
-    mongo_username: str = ''
+class Config(BaseSettings):
+    password: str = ''
+    username: str = ''
 
     db_name: str = ''
     db_type: str = ''
 
-    class Config:
-        env_file = '.env'
-
-
-class Settings(BaseSettings):
     secret_key: str = ''
     algorithm: str = ''
     access_token_expire_minutes: int = 0
 
-    class Config:
-        env_file = '.env'
+    model_config = SettingsConfigDict(env_file='.env', env_file_encoding='utf-8')
+
+class DbConfig(BaseModel):
+    password: str = ''
+    username: str = ''
+
+    db_name: str = ''
+    db_type: str = ''
 
 
-dbConfig = DbConfig()
-settings = Settings()
+class Settings(BaseModel):
+    secret_key: str = ''
+    algorithm: str = ''
+    access_token_expire_minutes: int = 0
+
+
+config = Config()
+
+dbConfig = DbConfig.model_validate(config.model_dump())
+settings = Settings.model_validate(config.model_dump())

@@ -1,5 +1,4 @@
 from fastapi.testclient import TestClient
-from typing import List
 import pytest
 from app.auth.oauth2 import create_access_token
 from app.models.users import User
@@ -12,7 +11,7 @@ from app.data.users import mock_users_list
 from app.config import dbConfig
 from app.main import app
 
-app.state.db = StorageFactory.get_storage(DatabaseType.STATE, dbConfig)
+app.state.db = StorageFactory.get_storage(DatabaseType.MEMORY, dbConfig)
 
 
 @app.on_event("startup")
@@ -46,7 +45,7 @@ def create_test_customers():
     ]
 
     for test_customer in test_customers_list:
-        customer = CustomerIn.parse_obj(test_customer)
+        customer = CustomerIn.model_validate(test_customer)
 
         new_customer = storage.create_customer(customer)
         customers.append(new_customer)
@@ -88,14 +87,14 @@ def authorized_client(client, token):
 
 
 @pytest.fixture
-def products() -> List[Product]:
+def products() -> list[Product]:
     storage = app.state.db
 
     return storage.products_list
 
 
 @pytest.fixture
-def test_customers() -> List[Customer]:
+def test_customers() -> list[Customer]:
     storage = app.state.db
 
     return storage.customers_list

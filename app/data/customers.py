@@ -1,8 +1,6 @@
 import time
-import uuid
-from typing import List
 
-from ..models.customers import CustomerType, Customer
+from ..models.customers import CustomerIn, CustomerType
 
 mock_customers_list = [
     {
@@ -136,10 +134,10 @@ mock_customers_list = [
 ]
 
 
-def parse_customers(customers_list):
-    parsed_customers: List[Customer] = []
+def parse_customers(customers_list) -> list[CustomerIn]:
+    parsed_customers: list[CustomerIn] = []
     for customer in customers_list:
-        parsed_customers.append(Customer.parse_obj(customer))
+        parsed_customers.append(CustomerIn.model_validate(customer))
         time.sleep(0.01)
 
     return parsed_customers

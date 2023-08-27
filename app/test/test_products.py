@@ -5,11 +5,11 @@ def test_get_all_products(authorized_client):
     res = authorized_client.get('/products/')
 
     def validate(product):
-        return Product.parse_obj(product)
+        return Product.model_validate(product)
 
     content = res.json()
 
-    ProductListCollection.parse_obj(content)
+    ProductListCollection.model_validate(content)
     products_map = map(validate, content['data'])
     products = list(products_map)
 
@@ -22,7 +22,7 @@ def test_get_all_products(authorized_client):
 def test_get_product(authorized_client, products):
     res = authorized_client.get(f'/products/{products[0].id}')
 
-    product = Product.parse_obj(res.json())
+    product = Product.model_validate(res.json())
 
     assert product.id == products[0].id
     assert type(product.type) == ProductType

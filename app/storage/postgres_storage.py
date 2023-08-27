@@ -1,7 +1,7 @@
 # import psycopg2
 # from psycopg2.extras import RealDictCursor
 # from psycopg2.extensions import cursor
-# from typing import List, Any
+# from typing import Any
 
 # from ..config import DbConfig
 # from ..models.products import Product, ProductListCollection
@@ -37,7 +37,7 @@
 #         self.password = dbConfig.postgresql_password
 
 #     @handle_db_connection
-#     def test_database(self) -> List[Any]:  # TODO: fix types (avoid any)
+#     def test_database(self) -> list[Any]:  # TODO: fix types (avoid any)
 #         self.client.execute(''' SELECT * FROM health ''')
 #         return self.client.fetchall()
 

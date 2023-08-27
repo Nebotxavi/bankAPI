@@ -1,5 +1,5 @@
 from enum import Enum, auto
-from typing import Protocol, List
+from typing import Protocol
 from pydantic import EmailStr
 from starlette.requests import Request
 
@@ -12,20 +12,20 @@ from .state_storage import StateStorage
 
 from ..models.general import Test
 from ..models.products import Product, ProductListCollection
-from ..models.customers import Customer, CustomerIn, CustomerPagination
+from ..models.customers import Customer, CustomerPagination
 
 
 class DatabaseType(Enum):
     MONGO = auto()
     POSTGRESQL = auto()
-    STATE = auto()
+    MEMORY = auto()
 
 
 class Storage(Protocol):
     def __init__(self, dbConfig: DbConfig) -> None:
         ...
 
-    def test_database(self) -> List[Test]:
+    def test_database(self) -> list[Test]:
         ...
 
     def get_products_list(self) -> ProductListCollection:
@@ -43,13 +43,13 @@ class Storage(Protocol):
     def create_customer(self, customer: Customer) -> Customer:
         ...
 
-    def update_customer(self, id, customer) -> Customer:
+    def update_customer(self, id, customer: Customer) -> Customer:
         ...
 
-    def delete_customer(self, id: str) -> None:
+    def delete_customer(self, id: int) -> None:
         ...
 
-    def get_user(self, id: int | None, mail: EmailStr | None) -> User:
+    def get_user(self, id: int | None = None, mail: EmailStr | None = None) -> User:
         ...
 
 

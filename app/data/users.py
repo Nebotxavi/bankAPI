@@ -1,9 +1,8 @@
 import time
-from typing import List
 
 from app.utils.utils import Crypt
 
-from ..models.users import User
+from ..models.users import UserIn
 
 mock_users_list = [
     {
@@ -18,9 +17,9 @@ mock_users_list = [
 
 
 def parse_users(user_list):
-    parsed_users: List[User] = []
+    parsed_users: list[UserIn] = []
     for user in user_list:
-        parsed_users.append(User.parse_obj(user))
+        parsed_users.append(UserIn.model_validate(user))
         time.sleep(0.01)
 
     return parsed_users

@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Depends
-from typing import List
 
 from ..models.general import Test
 from ..storage.storage import StorageAccess
@@ -12,7 +11,7 @@ router = APIRouter(
 )
 
 
-@router.get('/', response_model=List[Test])
+@router.get('/', response_model=list[Test])
 def test(client=Depends(StorageAccess.get_db)):
     # TODO: Error handling
     tests = client.test_database()

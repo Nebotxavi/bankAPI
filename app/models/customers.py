@@ -1,6 +1,6 @@
 from fastapi import Query
-from pydantic import BaseModel, Field
-from typing import Annotated, List
+from pydantic import BaseModel, Field, computed_field
+from typing import Annotated
 from enum import Enum
 
 from app.utils.utils import IdGenerator
@@ -26,11 +26,14 @@ class CustomerDetail(CustomerBase):
 
 
 class Customer(CustomerDetail):
-    id: int = Field(default_factory=IdGenerator.get_id)
+    id: int
 
 
 class CustomerIn(CustomerDetail):
-    pass
+    @computed_field
+    @property
+    def id(self) -> int:
+        return IdGenerator.get_id()
 
 
 class CustomerBasic(CustomerBase):
@@ -39,4 +42,4 @@ class CustomerBasic(CustomerBase):
 
 
 class CustomerPagination(PaginatedResponse):
-    data: List[CustomerBasic]
+    data: list[CustomerBasic]

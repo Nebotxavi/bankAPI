@@ -1,6 +1,7 @@
+from copy import copy
+
 import pytest
 from fastapi import status, Request
-from typing import List
 
 from app.http.hateoas import HateoasManager, HrefProvider
 from app.middleware.middleware import request_object
@@ -45,8 +46,8 @@ def test_href_get_url_with_params_without_params():
 
 
 def test_hateoas_manager_set_urls_with_id(test_customers):
-    customers: List[CustomerBasic] = [CustomerBasic.parse_obj(
-        customer) for customer in test_customers]
+    customers: list[CustomerBasic] = [CustomerBasic.model_validate(
+        customer.model_dump()) for customer in test_customers]
 
     hateoas = HateoasManager[CustomerBasic](
         customers, 'customers', key='id')
@@ -61,7 +62,8 @@ def test_hateoas_manager_set_urls_with_id(test_customers):
 
 
 def test_hateoas_manager_set_url_with_key(test_customers):
-    customer: CustomerBasic = CustomerBasic.parse_obj(test_customers[0])
+    customer = copy(test_customers[0])
+    customer: CustomerBasic = CustomerBasic.model_validate(customer.model_dump())
 
     hateoas = HateoasManager[CustomerBasic](
         [customer], 'customers', ref=f"test_resource_path_{customer.id}")
@@ -76,8 +78,8 @@ def test_hateoas_manager_set_url_with_key(test_customers):
 
 
 def test_hateoas_manager_set_url_without_id_or_key(test_customers):
-    customers: List[CustomerBasic] = [CustomerBasic.parse_obj(
-        customer) for customer in test_customers]
+    customers: list[CustomerBasic] = [CustomerBasic.model_validate(
+        customer.model_dump()) for customer in test_customers]
 
     hateoas = HateoasManager[CustomerBasic](
         customers, 'customers')

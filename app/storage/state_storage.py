@@ -1,7 +1,7 @@
 from fastapi import HTTPException, status
 from pydantic import EmailStr
 from starlette.datastructures import URL
-from typing import List, Dict
+from typing import Dict
 
 from app.http.hateoas import HrefProvider
 from app.models.users import User
@@ -11,7 +11,7 @@ from ..models.products import Product, ProductListCollection
 from ..models.customers import Customer, CustomerIn, CustomerPagination, Customer
 from ..models.users import User
 from ..models.general import Test, PaginatedResponse
-from ..exceptions.general_exceptions import noUniqueElement, resourceNotFound
+from ..exceptions.general_exceptions import ImmutableFieldError, NoUniqueElement, ResourceNotFound
 from ..data.customers import mock_parsed_customers
 from ..data.products import mock_parsed_products
 from ..data.users import mock_parsed_users
@@ -19,7 +19,7 @@ from ..data.users import mock_parsed_users
 
 class Paginator:
 
-    def __init__(self, dataset_list: List, page: int, per_page: int):
+    def __init__(self, dataset_list: list, page: int, per_page: int):
         self.dataset_list = dataset_list
         self.page = page
         self.per_page = per_page
@@ -31,7 +31,7 @@ class Paginator:
     def _get_url(self, params: Dict) -> URL:
         return HrefProvider.get_url_with_params(params)
 
-    def __get_paginated_dataset(self) -> List:
+    def __get_paginated_dataset(self) -> list:
         return self.dataset_list[self.offset: self.offset + self.per_page]
 
     def __get_total_pages(self) -> int:
@@ -60,7 +60,7 @@ class Paginator:
         next_page: str | None = self.__get_next_page()
         previous_page: str | None = self.__get_previous_page()
 
-        return PaginatedResponse.parse_obj({
+        return PaginatedResponse.model_validate({
             "data": data,
             'count': self.count,
             'total_pages': total_pages,
@@ -77,20 +77,20 @@ class StateStorage():
             Test(name='SuperTest', test=99)
         ]
 
-        self.users_list: List[User] = [User.parse_obj(
-            user.dict()) for user in mock_parsed_users]
+        self.users_list: list[User] = [User.model_validate(
+            user.model_dump()) for user in mock_parsed_users]
 
-        self.products_list: List[Product] = [Product.parse_obj(
-            product.dict()) for product in mock_parsed_products]
+        self.products_list: list[Product] = [Product.model_validate(
+            product.model_dump()) for product in mock_parsed_products]
 
-        self.customers_list: List[Customer] = [Customer.parse_obj(
-            customer.dict()) for customer in mock_parsed_customers]
+        self.customers_list: list[Customer] = [Customer.model_validate(
+            customer.model_dump()) for customer in mock_parsed_customers]
 
-    def __paginate(self, dataset_list: List, page: int, per_page: int) -> PaginatedResponse:
+    def __paginate(self, dataset_list: list, page: int, per_page: int) -> PaginatedResponse:
         paginator = Paginator(dataset_list, page, per_page)
         return paginator.get_pagination()
 
-    def __validate_personal_id(self, id: str, exception: List[str] = []) -> bool:
+    def __validate_personal_id(self, id: str, exception: list[str] = []) -> bool:
         all_ids = [
             customer.personal_id if customer.personal_id not in exception else '' for customer in self.customers_list]
 
@@ -100,7 +100,7 @@ class StateStorage():
         return True
 
     # TODO: to be removed
-    def test_database(self) -> List[Test]:
+    def test_database(self) -> list[Test]:
         return self.test_list
 
     def get_products_list(self) -> ProductListCollection:
@@ -111,16 +111,16 @@ class StateStorage():
         product = next((x for x in self.products_list if x.id == id), None)
 
         if not product:
-            raise resourceNotFound
+            raise ResourceNotFound
 
-        return product
+        return Product.model_validate(product)
 
     def get_customers_list(self, per_page: int, page: int) -> CustomerPagination:
 
-        dataset: List[Customer] = self.customers_list
+        dataset: list[Customer] = self.customers_list
         response = self.__paginate(dataset, page, per_page)
 
-        parsed_response = CustomerPagination.parse_obj(response.dict())
+        parsed_response = CustomerPagination.model_validate(response.model_dump())
 
         return parsed_response
 
@@ -128,57 +128,51 @@ class StateStorage():
         customer = next((x for x in self.customers_list if x.id == id), None)
 
         if not customer:
-            raise resourceNotFound
+            raise ResourceNotFound
 
-        return customer
+        return Customer.model_validate(customer)
 
     def create_customer(self, customer: Customer) -> Customer:
         is_personal_id_valid = self.__validate_personal_id(
             customer.personal_id)
 
         if not is_personal_id_valid:
-            raise noUniqueElement
-
-        # customer_with_id = Customer.parse_obj(customer.dict())
-        # new_customer = Customer.parse_obj(customer_with_id.dict())
+            raise NoUniqueElement
 
         self.customers_list.append(customer)
 
-        return customer
+        return Customer.model_validate(customer)
 
-    def update_customer(self, id: str, customer: CustomerIn) -> Customer:
+    def update_customer(self, id: str, customer: Customer) -> Customer:
         customer_index = next((ind for ind, customer in enumerate(
             self.customers_list) if customer.id == id), None)
 
         if customer_index == None:
-            raise resourceNotFound
+            raise ResourceNotFound
 
         current_customer = self.customers_list[customer_index]
 
-        if customer.personal_id:
-            is_personal_id_valid = self.__validate_personal_id(
-                customer.personal_id, [current_customer.personal_id])
+        is_personal_id_valid = self.__validate_personal_id(
+            customer.personal_id, [current_customer.personal_id])
 
-            if not is_personal_id_valid:
-                raise noUniqueElement
+        if not is_personal_id_valid:
+            raise NoUniqueElement
 
-        updated_customer = {
-            **current_customer.dict(),
-            **customer.dict()
-        }
+        if current_customer.id != customer.id:
+            raise ImmutableFieldError('id')
 
-        validated_customer = Customer.parse_obj(updated_customer)
+        validated_customer = Customer.model_validate(customer)
 
         self.customers_list[customer_index] = validated_customer
 
         return self.customers_list[customer_index]
 
-    def delete_customer(self, id: str) -> None:
+    def delete_customer(self, id: int) -> None:
         customer_index = next((ind for ind, customer in enumerate(
             self.customers_list) if customer.id == id), None)
 
         if customer_index == None:
-            raise resourceNotFound
+            raise ResourceNotFound
 
         del self.customers_list[customer_index]
 
@@ -194,6 +188,6 @@ class StateStorage():
                     id or user.mail == mail), None)
 
         if not user:
-            raise resourceNotFound
+            raise ResourceNotFound
 
         return user

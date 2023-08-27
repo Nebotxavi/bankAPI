@@ -1,6 +1,5 @@
 from pydantic import BaseModel, Field
-from pydantic.generics import GenericModel
-from typing import TypeVar, Generic, List, TypedDict, Any
+from typing import TypeVar, Generic, Any
 
 # TODO: to be removed
 
@@ -13,8 +12,8 @@ class Test(BaseModel):
 M = TypeVar('M')
 
 
-class ListResponse(GenericModel, Generic[M]):
-    data: List[M]
+class ListResponse(BaseModel, Generic[M]):
+    data: list[M]
 
 
 class PaginatedResponse(ListResponse):

@@ -5,14 +5,13 @@ from passlib.context import CryptContext
 class IdGenerator:
     @staticmethod
     def get_id() -> int:
-        return int(datetime.datetime.now().timestamp()*100000)
+        return int(datetime.datetime.now().timestamp() * 100000)
 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 class Crypt:
-
     @staticmethod
     def hash(password: str):
         return pwd_context.hash(password)

@@ -15,17 +15,17 @@ class HrefProvider:
         return base_url + path
 
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 class HateoasManager(Generic[T]):
     def __init__(
-            self,
-            dataset: list,
-            path: str,
-            key: str | None = None,
-            ref: str | int | None = None,
-            href_name: str = 'href'
+        self,
+        dataset: list,
+        path: str,
+        key: str | None = None,
+        ref: str | int | None = None,
+        href_name: str = "href",
     ):
         self.path = path
         self.dataset = dataset
@@ -36,8 +36,7 @@ class HateoasManager(Generic[T]):
     def __set_url(self, item: T):
         id = self.ref or (getattr(item, self.key) if self.key else "")
         if hasattr(item, self.href_name):
-            setattr(item, self.href_name,
-                    HrefProvider.get_url(f'{self.path}/{id}'))
+            setattr(item, self.href_name, HrefProvider.get_url(f"{self.path}/{id}"))
 
     def set_urls(self):
         for item in self.dataset:

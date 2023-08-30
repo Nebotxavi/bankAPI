@@ -9,7 +9,7 @@ mock_customers_list = [
         "middle_name": None,
         "surname": "Botifarra",
         "additional_surname": "Garcia",
-        "customer_type": CustomerType.ANALYST
+        "customer_type": CustomerType.ANALYST,
     },
     {
         "personal_id": "38528899F",
@@ -17,7 +17,7 @@ mock_customers_list = [
         "middle_name": "Von",
         "surname": "Rnauf",
         "additional_surname": None,
-        "customer_type": CustomerType.STANDARD
+        "customer_type": CustomerType.STANDARD,
     },
     {
         "personal_id": "38558899A",
@@ -25,7 +25,7 @@ mock_customers_list = [
         "middle_name": "Von",
         "surname": "Rnauf",
         "additional_surname": None,
-        "customer_type": CustomerType.STANDARD
+        "customer_type": CustomerType.STANDARD,
     },
     {
         "personal_id": "38998899B",
@@ -33,7 +33,7 @@ mock_customers_list = [
         "middle_name": "Von",
         "surname": "Rnauf",
         "additional_surname": None,
-        "customer_type": CustomerType.STANDARD
+        "customer_type": CustomerType.STANDARD,
     },
     {
         "personal_id": "38528877C",
@@ -41,7 +41,7 @@ mock_customers_list = [
         "middle_name": "Von",
         "surname": "Rnauf",
         "additional_surname": None,
-        "customer_type": CustomerType.STANDARD
+        "customer_type": CustomerType.STANDARD,
     },
     {
         "personal_id": "38528899D",
@@ -49,7 +49,7 @@ mock_customers_list = [
         "middle_name": "Von",
         "surname": "Rnauf",
         "additional_surname": None,
-        "customer_type": CustomerType.STANDARD
+        "customer_type": CustomerType.STANDARD,
     },
     {
         "personal_id": "38528899E",
@@ -57,7 +57,7 @@ mock_customers_list = [
         "middle_name": "Von",
         "surname": "Rnauf",
         "additional_surname": None,
-        "customer_type": CustomerType.STANDARD
+        "customer_type": CustomerType.STANDARD,
     },
     {
         "personal_id": "38521199F",
@@ -65,7 +65,7 @@ mock_customers_list = [
         "middle_name": "Von",
         "surname": "Rnauf",
         "additional_surname": None,
-        "customer_type": CustomerType.STANDARD
+        "customer_type": CustomerType.STANDARD,
     },
     {
         "personal_id": "38528899G",
@@ -73,7 +73,7 @@ mock_customers_list = [
         "middle_name": "Von",
         "surname": "Rnauf",
         "additional_surname": None,
-        "customer_type": CustomerType.STANDARD
+        "customer_type": CustomerType.STANDARD,
     },
     {
         "personal_id": "38528899H",
@@ -81,7 +81,7 @@ mock_customers_list = [
         "middle_name": "Von",
         "surname": "Rnauf",
         "additional_surname": None,
-        "customer_type": CustomerType.STANDARD
+        "customer_type": CustomerType.STANDARD,
     },
     {
         "personal_id": "38528899I",
@@ -89,7 +89,7 @@ mock_customers_list = [
         "middle_name": "Von",
         "surname": "Rnauf",
         "additional_surname": None,
-        "customer_type": CustomerType.STANDARD
+        "customer_type": CustomerType.STANDARD,
     },
     {
         "personal_id": "38528899J",
@@ -97,7 +97,7 @@ mock_customers_list = [
         "middle_name": "Von",
         "surname": "Rnauf",
         "additional_surname": None,
-        "customer_type": CustomerType.STANDARD
+        "customer_type": CustomerType.STANDARD,
     },
     {
         "personal_id": "38528899K",
@@ -105,7 +105,7 @@ mock_customers_list = [
         "middle_name": "Von",
         "surname": "Rnauf",
         "additional_surname": None,
-        "customer_type": CustomerType.STANDARD
+        "customer_type": CustomerType.STANDARD,
     },
     {
         "personal_id": "38528899L",
@@ -113,7 +113,7 @@ mock_customers_list = [
         "middle_name": "Von",
         "surname": "Rnauf",
         "additional_surname": None,
-        "customer_type": CustomerType.STANDARD
+        "customer_type": CustomerType.STANDARD,
     },
     {
         "personal_id": "38528899M",
@@ -121,7 +121,7 @@ mock_customers_list = [
         "middle_name": "Von",
         "surname": "Rnauf",
         "additional_surname": None,
-        "customer_type": CustomerType.STANDARD
+        "customer_type": CustomerType.STANDARD,
     },
     {
         "personal_id": "38528899N",
@@ -129,8 +129,8 @@ mock_customers_list = [
         "middle_name": "Von",
         "surname": "Rnauf",
         "additional_surname": None,
-        "customer_type": CustomerType.STANDARD
-    }
+        "customer_type": CustomerType.STANDARD,
+    },
 ]
 
 

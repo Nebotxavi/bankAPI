@@ -21,27 +21,27 @@ def create_test_customers():
 
     test_customers_list = [
         {
-            "personal_id": '62819372V',
+            "personal_id": "62819372V",
             "family_name": "Alphonse",
             "middle_name": None,
-            "surname": 'Mucha',
+            "surname": "Mucha",
             "additional_surname": None,
-            "customer_type": CustomerType.STANDARD
+            "customer_type": CustomerType.STANDARD,
         },
         {
-            "personal_id": '33942831U',
+            "personal_id": "33942831U",
             "family_name": "Xiaoxiang",
-            "surname": 'Cheng',
-            "customer_type": CustomerType.STANDARD
+            "surname": "Cheng",
+            "customer_type": CustomerType.STANDARD,
         },
         {
-            "personal_id": '83335212G',
+            "personal_id": "83335212G",
             "family_name": "Paco",
-            "middle_name": 'Lars',
-            "surname": 'Gimenez',
+            "middle_name": "Lars",
+            "surname": "Gimenez",
             "additional_surname": "Gonzalo",
-            "customer_type": CustomerType.ANALYST
-        }
+            "customer_type": CustomerType.ANALYST,
+        },
     ]
 
     for test_customer in test_customers_list:
@@ -68,7 +68,7 @@ def client():
 @pytest.fixture
 def test_user() -> User:
     storage = app.state.db
-    return storage.get_user(mail=mock_users_list[0]['mail'])
+    return storage.get_user(mail=mock_users_list[0]["mail"])
 
 
 @pytest.fixture
@@ -78,10 +78,7 @@ def token(test_user):
 
 @pytest.fixture
 def authorized_client(client, token):
-    client.headers = {
-        **client.headers,
-        'Authorization': f"Bearer {token}"
-    }
+    client.headers = {**client.headers, "Authorization": f"Bearer {token}"}
 
     return client
 

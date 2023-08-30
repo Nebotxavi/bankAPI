@@ -8,14 +8,14 @@ from .middleware.middleware import middleware
 
 app = FastAPI(middleware=middleware)
 
-origins = ['*']
+origins = ["*"]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
-    allow_headers=["*"]
+    allow_headers=["*"],
 )
 
 app.include_router(test.router)
@@ -24,11 +24,10 @@ app.include_router(customers.router)
 app.include_router(auth.router)
 
 
-@app.on_event('startup')
+@app.on_event("startup")
 def db_start():
     # TODO: error handling
-    app.state.db = StorageFactory.get_storage(
-        DatabaseType[dbConfig.db_type], dbConfig)
+    app.state.db = StorageFactory.get_storage(DatabaseType[dbConfig.db_type], dbConfig)
 
 
 @app.get("/health")

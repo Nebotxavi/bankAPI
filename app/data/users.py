@@ -7,12 +7,12 @@ from ..models.users import UserIn
 mock_users_list = [
     {
         "mail": "andrew.phew@apibank.com",
-        "password": Crypt.hash('testpassword1'),
+        "password": Crypt.hash("testpassword1"),
     },
     {
         "mail": "martin.gray@apibank.com",
-        "password": Crypt.hash('testpassword2'),
-    }
+        "password": Crypt.hash("testpassword2"),
+    },
 ]
 
 

@@ -12,7 +12,6 @@ class UserBase(BaseModel):
 
 
 class UserIn(UserBase):
-    
     @computed_field
     @property
     def id(self) -> int:

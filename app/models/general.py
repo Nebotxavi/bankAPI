@@ -1,5 +1,5 @@
-from pydantic import BaseModel, Field
-from typing import TypeVar, Generic, Any
+from pydantic import BaseModel
+from typing import TypeVar, Generic
 
 # TODO: to be removed
 
@@ -9,7 +9,7 @@ class Test(BaseModel):
     test: int
 
 
-M = TypeVar('M')
+M = TypeVar("M")
 
 
 class ListResponse(BaseModel, Generic[M]):

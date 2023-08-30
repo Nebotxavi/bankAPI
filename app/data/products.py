@@ -3,10 +3,7 @@ import time
 from app.models.products import ProductIn, ProductType
 
 
-mock_products_list = [
-    {'type': ProductType.BASIC},
-    {'type': ProductType.PLUS}
-]
+mock_products_list = [{"type": ProductType.BASIC}, {"type": ProductType.PLUS}]
 
 
 def parse_products(products_list):

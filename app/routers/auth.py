@@ -7,23 +7,27 @@ from app.models.auth import LoginResponse
 from app.storage.storage import Storage, StorageAccess
 from app.utils.utils import Crypt
 
-router = APIRouter(tags=['Authentication'])
+router = APIRouter(tags=["Authentication"])
 
 
-@router.post('/login', response_model=LoginResponse)
-def login(user_credentials: OAuth2PasswordRequestForm = Depends(), client: Storage=Depends(StorageAccess.get_db)):
+@router.post("/login", response_model=LoginResponse)
+def login(
+    user_credentials: OAuth2PasswordRequestForm = Depends(),
+    client: Storage = Depends(StorageAccess.get_db),
+):
     try:
-        user = client.get_user(
-            mail=user_credentials.username)  # username == mail
+        user = client.get_user(mail=user_credentials.username)  # username == mail
 
         if not Crypt.verify(user_credentials.password, user.password):
             raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN, detail=f"Invalid Credentials")
+                status_code=status.HTTP_403_FORBIDDEN, detail=f"Invalid Credentials"
+            )
 
-        access_token = create_access_token(data={'user_id': user.id})
+        access_token = create_access_token(data={"user_id": user.id})
 
-        return {'access_token': access_token, 'token_type': 'bearer'}
+        return {"access_token": access_token, "token_type": "Bearer"}
 
     except ResourceNotFound:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail=f"Invalid Credentials")
+            status_code=status.HTTP_403_FORBIDDEN, detail=f"Invalid Credentials"
+        )

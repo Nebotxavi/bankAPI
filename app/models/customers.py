@@ -1,5 +1,5 @@
 from fastapi import Query
-from pydantic import BaseModel, Field, computed_field
+from pydantic import BaseModel, computed_field
 from typing import Annotated
 from enum import Enum
 

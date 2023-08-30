@@ -25,5 +25,6 @@ class ProductIn(ProductBase):
     def id(self) -> int:
         return IdGenerator.get_id()
 
+
 class ProductListCollection(ListResponse):
     data: list[Product]

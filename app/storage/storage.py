@@ -7,6 +7,7 @@ from app.models.users import User
 
 from ..config import DbConfig
 from .mongo_storage import MongoStorage
+
 # from .postgres_storage import PostgresStorage
 from .state_storage import StateStorage
 
@@ -31,19 +32,19 @@ class Storage(Protocol):
     def get_products_list(self) -> ProductListCollection:
         ...
 
-    def get_product_by_id(self, id) -> Product:
+    def get_product_by_id(self, id: int) -> Product:
         ...
 
     def get_customers_list(self, per_page: int, page: int) -> CustomerPagination:
         ...
 
-    def get_customer_by_id(self, id) -> Customer:
+    def get_customer_by_id(self, id: int) -> Customer:
         ...
 
     def create_customer(self, customer: Customer) -> Customer:
         ...
 
-    def update_customer(self, id, customer: Customer) -> Customer:
+    def update_customer(self, id: int, customer: Customer) -> Customer:
         ...
 
     def delete_customer(self, id: int) -> None:

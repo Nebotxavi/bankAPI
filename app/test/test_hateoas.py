@@ -32,7 +32,7 @@ def provide_request():
 
 
 def test_href_provider_get_url_with_params():
-    url = HrefProvider.get_url_with_params({"param1": 1, "param2": "value2"})
+    url = HrefProvider.get_url_with_params({"param1": '1', "param2": "value2"})
 
     assert "1" in str(url)
     assert "value2" in str(url)

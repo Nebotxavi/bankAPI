@@ -26,7 +26,7 @@ class Paginator:
         page: int,
         per_page: int,
         sort: tuple[str, int],
-        filters: dict[str, str] = {}
+        filters: dict[str, Any] = {}
     ):
         self.collection = collection
         self.page = page
@@ -108,11 +108,11 @@ class MongoStorage:
         collection: collection.Collection,
         page: int,
         per_page: int,
-        filters: dict[str, str] = {},
-        sort: str | None = None,
+        filters: dict[str, Any] = {},
+        sort_by: str | None = None,
         direction: int | None = None
     ) -> PaginatedResponse:
-        sort_param = (sort or "_id", direction or 1)
+        sort_param = (sort_by or "_id", direction or 1)
         paginator = Paginator(collection, page, per_page, sort_param, filters)
         return paginator.get_pagination()
 
@@ -135,8 +135,9 @@ class MongoStorage:
 
         return Product.model_validate(product)
 
-    def get_customers_list(self, per_page: int, page: int, sort: str | None = None, direction: int | None = None) -> CustomerPagination:
-        response = self.__paginate(self.customers_collection, page, per_page, sort=sort, direction=direction)
+    def get_customers_list(self, per_page: int, page: int, sort_by: str | None = None, direction: int | None = None, search: str = '') -> CustomerPagination:
+        filters = { "$or": [ {"family_name": {"$regex": search}}, {"middle_name": {"$regex": search}}, {"surname": {"$regex": search}}, {'additional_surname': {"$regex": search} } ]} if search else {} 
+        response = self.__paginate(self.customers_collection, page, per_page, sort_by=sort_by, direction=direction, filters=filters)
 
         parsed_response = CustomerPagination.model_validate(response.model_dump())
 

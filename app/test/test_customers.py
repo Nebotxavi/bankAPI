@@ -33,6 +33,17 @@ def test_get_customers(authorized_client, test_customers: list[Customer]):
     assert len(customers) > 0
     assert res.status_code == 200
 
+def test_get_customers_with_search(authorized_client, test_customers: list[Customer]):
+    search = test_customers[0].family_name
+
+    res = authorized_client.get(f"/customers/?search={search}")
+
+    response = CustomerPagination.model_validate(res.json())
+
+    assert search in test_customers[0].family_name
+    for item in response.data:
+        assert search in item.family_name
+
 
 def test_get_customers_with_pagination_params(
     authorized_client, test_customers: list[Customer]

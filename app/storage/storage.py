@@ -35,7 +35,7 @@ class Storage(Protocol):
     def get_product_by_id(self, id: int) -> Product:
         ...
 
-    def get_customers_list(self, per_page: int, page: int, sort: str | None, direction: int) -> CustomerPagination:
+    def get_customers_list(self, per_page: int, page: int, sort_by: str | None, direction: int, search: str = '') -> CustomerPagination:
         ...
 
     def get_customer_by_id(self, id: int) -> Customer:

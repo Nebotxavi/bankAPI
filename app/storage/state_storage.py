@@ -1,3 +1,4 @@
+from copy import copy
 from pydantic import EmailStr
 from starlette.datastructures import URL
 from typing import Dict
@@ -93,9 +94,12 @@ class StateStorage:
         ]
 
     def __paginate(
-        self, dataset_list: list, page: int, per_page: int
+        self, dataset_list: list, page: int, per_page: int, sort_by: str | None = None, direction: int | None = None
     ) -> PaginatedResponse:
-        paginator = Paginator(dataset_list, page, per_page)
+        dataset = copy(dataset_list)
+        if sort_by and direction:
+            dataset = sorted(dataset, key=lambda item: item[sort_by], reverse=direction == -1)
+        paginator = Paginator(dataset, page, per_page)
         return paginator.get_pagination()
 
     def __validate_personal_id(self, id: str) -> bool:
@@ -122,9 +126,20 @@ class StateStorage:
 
         return Product.model_validate(product)
 
-    def get_customers_list(self, per_page: int, page: int, sort: str | None = None, direction: int | None = None) -> CustomerPagination:
+    def __get_filtered_data(self, dataset: list[Customer], search: str) -> list:
+        filtered = []
+        for item in dataset:
+            if search in item.family_name or (item.middle_name and search in item.middle_name) or search in item.surname or (item.additional_surname and search in item.additional_surname):
+                filtered.append(item)
+
+        return filtered
+
+
+    def get_customers_list(self, per_page: int, page: int, sort_by: str | None = None, direction: int | None = None, search: str = '') -> CustomerPagination:
         dataset: list[Customer] = self.customers_list
-        response = self.__paginate(dataset, page, per_page)
+        if (search):
+            dataset = self.__get_filtered_data(dataset, search)
+        response = self.__paginate(dataset, page, per_page, sort_by, direction)
 
         parsed_response = CustomerPagination.model_validate(response.model_dump())
 

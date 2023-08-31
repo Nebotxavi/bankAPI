@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 from app.exceptions.general_exceptions import ResourceNotFound
 
 from app.models.auth import TokenData
-from app.storage.storage import StorageAccess
+from app.storage.storage import Storage, StorageAccess
 from app.config import settings
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
@@ -41,7 +41,7 @@ def _verify_access_token(token: str, credentials_exception: HTTPException) -> To
 
 
 def get_current_user(
-    token: str = Depends(oauth2_scheme), client=Depends(StorageAccess.get_db)
+    token: str = Depends(oauth2_scheme), client: Storage=Depends(StorageAccess.get_db)
 ):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,

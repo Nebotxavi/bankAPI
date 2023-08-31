@@ -4,7 +4,7 @@ from app.auth.oauth2 import create_access_token
 from app.models.users import User
 
 
-from app.storage.storage import StorageFactory, DatabaseType
+from app.storage.storage import Storage, StorageFactory, DatabaseType
 from app.models.customers import CustomerType, CustomerIn, Customer
 from app.models.products import Product
 from app.data.users import mock_users_list
@@ -15,8 +15,8 @@ app.state.db = StorageFactory.get_storage(DatabaseType.MEMORY, dbConfig)
 
 
 @app.on_event("startup")
-def create_test_customers():
-    storage = app.state.db
+def create_test_customers() -> list[Customer]:
+    storage: Storage = app.state.db
     customers = []
 
     test_customers_list = [
@@ -47,7 +47,7 @@ def create_test_customers():
     for test_customer in test_customers_list:
         customer = CustomerIn.model_validate(test_customer)
 
-        new_customer = storage.create_customer(customer)
+        new_customer = storage.create_customer(Customer.model_validate(customer.model_dump()))
         customers.append(new_customer)
 
     return customers

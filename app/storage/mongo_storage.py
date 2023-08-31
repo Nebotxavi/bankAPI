@@ -25,25 +25,27 @@ class Paginator:
         collection: collection.Collection,
         page: int,
         per_page: int,
-        filters: dict[str, str] = {},
+        sort: tuple[str, int],
+        filters: dict[str, str] = {}
     ):
         self.collection = collection
         self.page = page
         self.per_page = per_page
         self.filters = filters
         self.skip = per_page * (page - 1)
+        self.sort = sort
 
     def __get_url(self, params: dict) -> URL:
         return HrefProvider.get_url_with_params(params)
 
     def __get_data(self):
-        return self.collection.find(self.filters).skip(self.skip).limit(self.per_page)
+        return self.collection.find(self.filters).sort(*self.sort).skip(self.skip).limit(self.per_page)
 
-    def __get_count(self):
+    def __get_count(self) -> int:
         self.count = self.collection.count_documents(self.filters)
         return self.count
 
-    def __get_total_pages(self):
+    def __get_total_pages(self) -> int:
         return (
             self.count // self.per_page + 1
             if self.count % self.per_page
@@ -107,8 +109,11 @@ class MongoStorage:
         page: int,
         per_page: int,
         filters: dict[str, str] = {},
+        sort: str | None = None,
+        direction: int | None = None
     ) -> PaginatedResponse:
-        paginator = Paginator(collection, page, per_page, filters)
+        sort_param = (sort or "_id", direction or 1)
+        paginator = Paginator(collection, page, per_page, sort_param, filters)
         return paginator.get_pagination()
 
     def test_database(self) -> list[Test]:
@@ -130,8 +135,8 @@ class MongoStorage:
 
         return Product.model_validate(product)
 
-    def get_customers_list(self, per_page: int, page: int) -> CustomerPagination:
-        response = self.__paginate(self.customers_collection, page, per_page)
+    def get_customers_list(self, per_page: int, page: int, sort: str | None = None, direction: int | None = None) -> CustomerPagination:
+        response = self.__paginate(self.customers_collection, page, per_page, sort=sort, direction=direction)
 
         parsed_response = CustomerPagination.model_validate(response.model_dump())
 

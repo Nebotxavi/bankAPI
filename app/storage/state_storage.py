@@ -28,7 +28,7 @@ class Paginator:
         self.offset = (page - 1) * per_page
         self.count = len(dataset_list)
 
-        self.total_pages = 0
+        # self.total_pages = 0
 
     def _get_url(self, params: Dict) -> URL:
         return HrefProvider.get_url_with_params(params)
@@ -37,16 +37,14 @@ class Paginator:
         return self.dataset_list[self.offset : self.offset + self.per_page]
 
     def __get_total_pages(self) -> int:
-        total_pages = (
+        return (
             self.count // self.per_page + 1
             if self.count % self.per_page
             else self.count // self.per_page
         )
-        self.total_pages = total_pages
-        return self.total_pages
 
     def __get_next_page(self) -> str | None:
-        if self.page < self.total_pages:
+        if self.page < self.__get_total_pages():
             url = self._get_url({"page": self.page + 1})
             return str(url)
         else:
@@ -124,7 +122,7 @@ class StateStorage:
 
         return Product.model_validate(product)
 
-    def get_customers_list(self, per_page: int, page: int) -> CustomerPagination:
+    def get_customers_list(self, per_page: int, page: int, sort: str | None = None, direction: int | None = None) -> CustomerPagination:
         dataset: list[Customer] = self.customers_list
         response = self.__paginate(dataset, page, per_page)
 

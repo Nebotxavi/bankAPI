@@ -4,7 +4,7 @@ from typing import TypeVar, Generic
 
 class HrefProvider:
     @staticmethod
-    def get_url_with_params(params={}):
+    def get_url_with_params(params: dict[str, str]={}):
         request = request_object.get()
         return request.url.include_query_params(**params)
 

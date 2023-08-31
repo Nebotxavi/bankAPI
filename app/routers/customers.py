@@ -19,16 +19,17 @@ router = APIRouter(prefix="/customers", tags=["Customers"])
 
 @router.get("/", response_model=CustomerPagination)
 def get_customers_list(
-    client=Depends(StorageAccess.get_db),
+    client: Storage = Depends(StorageAccess.get_db),
     current_user: int = Depends(get_current_user),
     per_page: Literal["5", "10", "25"] = "10",
     page: Annotated[int, Query(gt=0)] = 1,
+    sort: str | None = None,
+    direction: Literal['-1', '1'] = '1'
 ):
     # TODO: SORT
 
     # TODO: SEARCH
-
-    customers: CustomerPagination = client.get_customers_list(int(per_page), page)
+    customers: CustomerPagination = client.get_customers_list(int(per_page), page, sort, int(direction))
 
     hateoas = HateoasManager[CustomerBasic](customers.data, "customers", key="id")
     hateoas.set_urls()

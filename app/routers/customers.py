@@ -27,9 +27,6 @@ def get_customers_list(
     direction: Literal['-1', '1'] = '1',
     search: str = ''
 ):
-    # TODO: SORT
-
-    # TODO: SEARCH
     customers: CustomerPagination = client.get_customers_list(int(per_page), page, sort_by, int(direction), search)
 
     hateoas = HateoasManager[CustomerBasic](customers.data, "customers", key="id")

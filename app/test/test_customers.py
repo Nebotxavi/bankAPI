@@ -44,6 +44,38 @@ def test_get_customers_with_search(authorized_client, test_customers: list[Custo
     for item in response.data:
         assert search in item.family_name
 
+def test_get_customers_with_inexistent_search(authorized_client, ):
+    search = 'this_is_an_inexistent_field_content'
+
+    res = authorized_client.get(f"/customers/?search={search}")
+
+    response = CustomerPagination.model_validate(res.json())
+
+    assert not len(response.data)
+
+def test_get_customers_with_sort(authorized_client):
+    sort_by = 'family_name'
+    direction = '-1'
+
+    res = authorized_client.get(f"/customers/?sort_by={sort_by}&direction={direction}")
+
+    response = CustomerPagination.model_validate(res.json())
+
+    prev_item : CustomerBasic | None = None
+    for item in response.data:
+        if prev_item:
+            assert prev_item.family_name <= item.family_name
+        prev_item = item
+
+def test_get_customers_with_wrong_sort(authorized_client):
+    sort_by = 'wrong_sort_field'
+
+    res = authorized_client.get(f"/customers/?sort_by={sort_by}")
+
+    response = CustomerPagination.model_validate(res.json())
+
+    assert len(response.data)
+
 
 def test_get_customers_with_pagination_params(
     authorized_client, test_customers: list[Customer]

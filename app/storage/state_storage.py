@@ -94,11 +94,11 @@ class StateStorage:
         ]
 
     def __paginate(
-        self, dataset_list: list, page: int, per_page: int, sort_by: str | None = None, direction: int | None = None
+        self, dataset_list: list[Customer], page: int, per_page: int, sort_by: str | None = None, direction: int | None = None
     ) -> PaginatedResponse:
         dataset = copy(dataset_list)
-        if sort_by and direction:
-            dataset = sorted(dataset, key=lambda item: item[sort_by], reverse=direction == -1)
+        if sort_by and hasattr(Customer, sort_by) and direction:
+            dataset = sorted(dataset, key=lambda item: getattr(item, sort_by), reverse=direction == -1)
         paginator = Paginator(dataset, page, per_page)
         return paginator.get_pagination()
 

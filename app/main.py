@@ -3,8 +3,9 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .config import dbConfig
 from .storage.storage import DatabaseType, StorageFactory
-from .routers import test, products, customers, auth
+from .routers import test, products, customers, auth, stock
 from .middleware.middleware import middleware
+
 
 app = FastAPI(middleware=middleware)
 
@@ -22,6 +23,7 @@ app.include_router(test.router)
 app.include_router(products.router)
 app.include_router(customers.router)
 app.include_router(auth.router)
+app.include_router(stock.router)
 
 
 @app.on_event("startup")

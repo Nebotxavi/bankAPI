@@ -10,6 +10,7 @@ from app.exceptions.general_exceptions import (
     ResourceNotFound,
 )
 from app.http.hateoas import HrefProvider
+from app.models.stock import Stock
 
 from app.models.users import User
 
@@ -89,6 +90,7 @@ class MongoStorage:
         self.health_collection: collection.Collection = self.db.health
         self.products_collection: collection.Collection = self.db.products
         self.customers_collection: collection.Collection = self.db.customers
+        self.stocks_collection: collection.Collection = self.db.stock
 
     def __validate_personal_id(self, id: str) -> bool:
         all_ids = [
@@ -208,3 +210,10 @@ class MongoStorage:
             raise ResourceNotFound
 
         return User.model_validate(user)
+
+    def get_stocks(self) -> list[Stock]:
+        stocks = self.stocks_collection.find({})
+
+        stocks = [Stock.model_validate(stock) for stock in stocks]
+
+        return stocks

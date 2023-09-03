@@ -4,6 +4,7 @@ from starlette.datastructures import URL
 from typing import Dict
 
 from app.http.hateoas import HrefProvider
+from app.models.stock import Stock
 from app.models.users import User
 
 from ..config import DbConfig
@@ -225,3 +226,7 @@ class StateStorage:
             raise ResourceNotFound
 
         return user
+
+
+    def get_stocks(self) -> list[Stock]:
+        ...

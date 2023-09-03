@@ -2,6 +2,7 @@ from enum import Enum, auto
 from typing import Protocol
 from pydantic import EmailStr
 from starlette.requests import Request
+from app.models.stock import Stock
 
 from app.models.users import User
 
@@ -53,6 +54,8 @@ class Storage(Protocol):
     def get_user(self, id: int | None = None, mail: EmailStr | None = None) -> User:
         ...
 
+    def get_stocks(self) -> list[Stock]:
+        ...
 
 class StorageAccess:
     @staticmethod
